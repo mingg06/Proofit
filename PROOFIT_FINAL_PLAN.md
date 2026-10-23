@@ -1,7 +1,7 @@
 # PROOFIT — Verify the Action Before It Happens
 
 **Tagline:** You proof it. You profit.  
-**Version:** 3.1 · 23 October 2026  
+**Version:** 3.2 · 24 October 2026  
 **Project type:** Standalone Web2 application, built independently  
 **Recommended track:** Track 3 — Reasoning Architecture  
 **Status:** Proposal and implementation plan; no implementation or evaluation results claimed
@@ -194,7 +194,7 @@ It does not select an action by counting votes or infer authority from persuasiv
 | **Zetaris** | Query customer/request/payment records plus a separate approved policy/case-document source | Real query references and a case using both source systems |
 | **Meterless** | Persist unresolved issues and evidence pointers; retrieve them when reopening a case | Actual memory write/read references and resume after process restart |
 | **NVIDIA** | Accessible Nemotron model extracts structured findings and directs evidence investigation | Exact model ID, real inference records, schema-validated output, latency |
-| **Cursor with SpaceXAI** | Required development environment | Accurate development notes and organiser-requested evidence |
+| **Cursor / another AI coding tool** | Development tool; Cursor is optional under current official Academy guidance [S12] | Accurate development notes identifying the tools actually used |
 
 Use a database source and a separate file/REST-backed policy source through Zetaris. Query live provider state through a typed Stripe adapter before execution. A stale imported payment row must not be the final authority on the remaining refundable balance.
 
@@ -529,7 +529,7 @@ Confirm required video duration, repository visibility, access instructions, and
 - [ ] Both supported actions have explicit structured intent and authority rules.
 - [ ] The proposing/investigating agent cannot access provider execution credentials.
 - [ ] Wrong actions, amounts, targets, and missing approvals cannot execute through the protected path.
-- [ ] Real Zetaris, Meterless, NVIDIA, and required development-environment use demonstrated.
+- [ ] Real Zetaris, Meterless, and NVIDIA use demonstrated; development tools documented accurately.
 - [ ] The agent performs evidence-directed investigation, not a scripted verdict display.
 - [ ] A legitimate test cancellation and test refund execute and reconcile.
 - [ ] Repeated/concurrent requests and process restarts preserve operation identity.
@@ -548,7 +548,7 @@ AI support agents can perform valid API operations that customers or businesses 
 
 ## 19. Sources and verification notes
 
-Checked or rechecked during proposal preparation, 22–23 October 2026. Sources support documented platform capabilities; none proves this unbuilt implementation or its market demand.
+Checked or rechecked during proposal preparation, 22–24 October 2026. Sources support documented platform capabilities; none proves this unbuilt implementation or its market demand.
 
 - **[S1] Official event and tracks:** https://hackathon.genai.works/event/open-agent-hackathon-2026
 - **[S2] Stripe refund behavior and limits:** https://docs.stripe.com/refunds
@@ -561,3 +561,5 @@ Checked or rechecked during proposal preparation, 22–23 October 2026. Sources 
 - **[S9] NVIDIA LLM API catalogue:** https://docs.api.nvidia.com/nim/reference/llm-apis
 - **[S10] eve setup and prerequisites:** https://eve.dev/docs/getting-started
 - **[S11] OWASP agent tool and authorisation controls:** https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html
+
+- **[S12] Official Academy build-tool guidance:** https://academy.genai.works/courses/open-agent-hackathon-2026/details — explicitly permits Cursor or another AI coding tool; also describes Meterless Engines and a Nightshift/Nemotron learning path. The final inference deployment route must be verified against available event access.
