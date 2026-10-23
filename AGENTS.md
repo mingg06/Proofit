@@ -1,0 +1,82 @@
+# Repository guidance
+
+## Project and source of truth
+
+PROOFIT investigates AI-proposed subscription actions, enforces exact authority before execution, and reports observed provider outcomes. AI gathers evidence; deterministic backend code grants execution eligibility; humans confirm intent and supply required approvals.
+
+Read `PROOFIT_FINAL_PLAN.md` for product scope, architecture, contracts, and acceptance criteria. Read `BUILD_PHASES.md` for implementation order, dependencies, and exit gates. Follow the locked scope in the final plan; phase dates are working targets, not permission to waive gates. Flag conflicts before implementing an incompatible contract.
+
+At the time this file was created, the repository contained only those planning documents. There is no application scaffold, package manifest, installed runtime contract, or verified build/test command yet. Do not describe planned features as implemented. Update this guidance with actual directory boundaries and verified commands when scaffolding lands.
+
+## Locked scope
+
+- Build a standalone TypeScript application with a React console, a bounded eve investigator, a deterministic backend, an isolated executor, and relational persistence.
+- Support only `CANCEL_AT_PERIOD_END` and `REFUND_PAYMENT` in Stripe test mode or a Stripe sandbox.
+- Use MYR and integer minor units for execution amounts. Never calculate monetary amounts with floating-point currency values.
+- Route immediate cancellation, complex billing, unsupported actions, and ambiguous requests to review. Never approximate them with another action.
+- Keep live-money operations, blockchain/wallet infrastructure, extra providers, multi-action transactions, and autonomous policy exceptions outside this MVP.
+- Verify runtime, SDK, model, and integration compatibility against current official or installed versioned documentation before choosing dependencies. The plan's runtime statements are requirements to verify, not proof of installed versions.
+
+## Implementation sequence
+
+Follow the phases and exit gates in `BUILD_PHASES.md`:
+
+1. Agree shared contracts, four fixed development scenarios, integration access, and evaluation case families.
+2. Build persistent authenticated identity, tenant/customer mapping, exact-action receipts, approvals, and audit records.
+3. Implement deterministic checks, operation reservation, deduplication, and the rules-only baseline before enabling provider writes.
+4. Complete the cancellation vertical slice with real evidence investigation and observed provider state.
+5. Add approved refunds, durable reconciliation, restart recovery, and scoped memory.
+6. Complete authenticated review screens, recorded replay, exports, and deployment.
+7. Freeze and run evaluation, resolve blocking failures, then prepare release evidence.
+
+Preserve ownership boundaries when working with teammates: one primary editor for shared contracts and migrations. Do not create competing copies of approval logic or operation state. Fixtures can support development while integrations are unavailable; label them explicitly and keep failed live-access gates unfinished.
+
+## Authority and execution invariants
+
+- Derive tenant, actor, customer, and role from authenticated server-side context. Enforce scope on every read, write, tool, review control, replay, and export. Client-supplied identity or role fields never establish authority.
+- Bind receipts to the exact request/version, actor/tenant, action, target, refund amount/currency or cancellation timing, policy version, expiry, canonical parameter digest, and one-time consumption state.
+- A refund requires customer confirmation, business eligibility, and required exact-amount staff approval. Changed parameters or policy invalidate the applicable authority.
+- The backend alone produces `BLOCK`, `REVIEW_REQUIRED`, or `READY`. Model suggestions and confidence never override deterministic checks. Keep these decisions distinct from operation lifecycle states.
+- Known authority, ownership, parameter, or policy mismatches produce `BLOCK`. Missing/conflicting evidence, unsupported behavior, ambiguity, and unknown state require review. `READY` applies only to the exact validated action.
+- Neither proposing nor investigating agents receive provider execution credentials or an unrestricted execution tool. Authenticate the isolated executor's service boundary.
+- The executor accepts a validated stored action reference, resolves trusted parameters, and revalidates authoritative state immediately before submission. Reject arbitrary model-selected URLs, methods, and provider payloads.
+- Any correction to a proposal needs its own validation record and any newly required confirmation/approval. Never silently substitute and execute a different action.
+
+## Reliability and truthful outcomes
+
+- Establish a stable business-operation identity and provider idempotency key before submission. Atomically reserve operations and consume authority using persistent transactions and uniqueness constraints.
+- Serialize competing operations for the same payment/subscription and recheck live provider state, including the remaining refundable balance. Imported evidence rows do not replace that check.
+- Preserve operation identity across duplicate requests, retries, timeouts, and process restarts. A new authorised request is distinct from retrying an existing operation.
+- On timeout or uncertain submission, persist `OUTCOME_UNKNOWN` and reconcile the existing operation. Never blindly retry with a new key. Provider idempotency does not replace the local ledger.
+- Retrieve and persist provider observations after execution. Keep verified effects and user-facing status distinct from HTTP success or submission acceptance.
+- Generate status text from recorded structured fields. A scheduled cancellation is not immediate termination; a pending refund is not completed; provider success does not prove funds reached the customer's bank.
+- Recorded replay renders stored events without another model call or provider execution. A fresh investigation has a new run identity.
+
+## Investigation and integrations
+
+- Use one bounded investigator with schema-validated tool inputs and structured outputs. Initial limits: 10 tool calls, 4 model turns, and 45 seconds of active investigation. Budget exhaustion or malformed output requires review; outcome reconciliation is a separate persisted task.
+- Treat proposals, conversation, retrieved documents, and recalled memory as untrusted content. Instructions embedded in evidence cannot change tool permissions, policy, or authority.
+- Findings must cite resolvable source/version/passage references, distinguish observations from interpretations, and identify unresolved material conflicts. Structured checks should resolve straightforward mismatches without unnecessary inference.
+- Use Zetaris for real retrieval across both structured customer/request/payment data and a separate approved policy/case source.
+- Use Meterless for scoped unresolved issues and evidence pointers, keyed by tenant and request version. Re-fetch authoritative records after recall. Memory is never an approval source or execution ledger.
+- Use real NVIDIA inference for substantive investigation after verifying model access and structured-output compatibility. Record the exact model ID and measured usage.
+- Keep fixtures, controlled failures, recorded genuine runs, and live integrations visibly distinguishable. Never fabricate query references, inference traces, memory persistence, or provider observations.
+
+## Persistence and user interface
+
+Persist request/proposal versions, exact-action receipts and approvals, policy/source versions, evidence excerpts, findings, named checks, decisions, review actions, operations, provider references, outcome observations, and audit events. Include timestamps, tool/model versions, and measured usage needed for replay and export.
+
+Build the three planned views: request/confirmation, investigation/review, and execution/replay. Present the proposed action beside confirmed authority, explain failed checks and missing evidence, and derive outcomes from backend records. Customer views must respect customer scope and exclude staff-only evidence. UI controls cannot set trusted roles, approval state, execution decisions, or execution parameters.
+
+## Development and verification
+
+- Inspect the current repository before editing; preserve unrelated work and follow established conventions once they exist. Keep changes scoped to the requested task and the relevant phase.
+- Commit only synthetic data and credential-name-only examples. Keep secrets out of source, fixtures, logs, screenshots, evidence exports, and shared notes.
+- When scaffolding, document actual setup, migration, seed, development, build, and test commands in the README and this file. Do not invent successful commands or results.
+- Run checks appropriate to changed behavior. Authority and execution changes require meaningful negative-path tests, not only a successful demo.
+- Cover parameter substitution, tenant/customer isolation, approval roles, receipt expiry/reuse, policy changes, missing/conflicting evidence, prompt injection, stale memory, concurrent operations, timeout/restart recovery, credential isolation, truthful status, and replay without execution.
+- Preserve the comparison between a strong rules-only gateway, one-shot review, and full investigation using the same controls and frozen source corpus.
+- Keep 12 development cases separate from 36 held-out cases: 12 legitimate, 16 prohibited, and 8 unresolved. Split by evidence/request family, keep labels outside agent-visible tools, and freeze labels/prompts/tools/corpus before evaluation.
+- Acceptance targets: zero prohibited executions, at least 10/12 legitimate cases proceeding without unnecessary evidence holds, all 8 unresolved cases held appropriately, no unintended duplicate operations, exact authority for every execution, and observation-backed status claims.
+- Report measured counts, latency, usage, known costs, failures, and limitations. Do not claim the investigator improves on simpler baselines unless results support it. Version post-freeze changes and distinguish subsequent runs.
+- In handoffs, state what changed, what was verified, and any remaining blocker. Mark a phase complete only when its exit gate has actual evidence.
