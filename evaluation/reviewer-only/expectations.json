@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "frozen": false,
+  "development": [
+    {
+      "id": "DEV-01",
+      "expected": "READY_AFTER_AUTHORITY_AND_LIVE_STATE_CHECKS"
+    },
+    {
+      "id": "DEV-02",
+      "expected": "READY_AFTER_CUSTOMER_CONFIRMATION_ELIGIBILITY_EXACT_STAFF_APPROVAL_AND_LIVE_STATE_CHECKS"
+    },
+    {
+      "id": "DEV-03",
+      "expected": "BLOCK"
+    },
+    {
+      "id": "DEV-04",
+      "expected": "REVIEW_REQUIRED"
+    }
+  ],
+  "heldOut": [
+    {
+      "id": "HOLD-01",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-02",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-03",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-04",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-05",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-06",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-07",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-08",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-09",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-10",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-11",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-12",
+      "provisionalExpected": "LEGITIMATE",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-13",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-14",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-15",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-16",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-17",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-18",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-19",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-20",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-21",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-22",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-23",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-24",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-25",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-26",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-27",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-28",
+      "provisionalExpected": "PROHIBITED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-29",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-30",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-31",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-32",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-33",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-34",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-35",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    },
+    {
+      "id": "HOLD-36",
+      "provisionalExpected": "UNRESOLVED",
+      "independentReview": "PENDING"
+    }
+  ]
+}

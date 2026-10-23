@@ -1,0 +1,94 @@
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
+import { z, ZodError } from 'zod';
+import { Foundation } from './foundation.ts';
+import { HttpError } from './auth.ts';
+
+function cookieToken(req: IncomingMessage): string | undefined {
+  const values = (req.headers.cookie ?? '').split(';').map(s => s.trim()).filter(s => s.startsWith('proofit_session='));
+  if (values.length !== 1) return undefined;
+  return values[0]?.slice('proofit_session='.length);
+}
+async function jsonBody(req: IncomingMessage): Promise<unknown> {
+  if (req.headers['content-type']?.split(';')[0]?.trim() !== 'application/json') throw new HttpError(415, 'JSON content type required');
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []; let bytes = 0; let failed = false;
+    req.on('data', (chunk: Buffer) => {
+      bytes += chunk.length;
+      if (bytes > 65536) { failed = true; chunks.length = 0; reject(new HttpError(413, 'Request body too large')); }
+      if (!failed) chunks.push(chunk);
+    });
+    req.on('end', () => {
+      if (failed) return;
+      try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); }
+      catch { reject(new HttpError(400, 'Invalid JSON')); }
+    });
+    req.on('error', () => reject(new HttpError(400, 'Incomplete request')));
+    req.on('aborted', () => reject(new HttpError(400, 'Incomplete request')));
+  });
+}
+function send(res: ServerResponse, status: number, body: unknown): void {
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'", 'Referrer-Policy': 'no-referrer' });
+  res.end(JSON.stringify(body));
+}
+const querySchema = z.strictObject({ version: z.coerce.number().int().positive().default(1) });
+export function createApi(foundation: Foundation, origin: string) {
+  const secure = new URL(origin).protocol === 'https:';
+  const cookie = (value: string, maxAge: number) => 'proofit_session=' + value + '; HttpOnly; SameSite=Strict; Path=/; Max-Age=' + maxAge + (secure ? '; Secure' : '');
+  // Local development protection. Distributed/deployed auth needs a shared rate limiter.
+  const logins = new Map<string, { count: number; resetsAt: number }>();
+  const server = createServer(async (req, res) => {
+    try {
+      const method = req.method ?? 'GET';
+      const url = new URL(req.url ?? '/', origin);
+      const path = url.pathname;
+      if (req.headers.origin && req.headers.origin !== origin) throw new HttpError(403, 'Origin rejected');
+      if (method === 'GET' && path === '/health') return send(res, 200, { status: 'ok', stage: 'PERSISTENT_FOUNDATION', executionEnabled: false });
+      if (method === 'POST' && req.headers.origin !== origin) throw new HttpError(403, 'Origin required');
+      if (method === 'POST' && path === '/api/login') {
+        const key = req.socket.remoteAddress ?? 'unknown';
+        const previous = logins.get(key);
+        const window = previous && previous.resetsAt > Date.now() ? previous : { count: 0, resetsAt: Date.now() + 60000 };
+        if (++window.count > 20) throw new HttpError(429, 'Too many login attempts');
+        if (logins.size > 10000) logins.clear();
+        logins.set(key, window);
+        const login = await foundation.auth.login(await jsonBody(req));
+        res.setHeader('Set-Cookie', cookie(login.token, 8 * 60 * 60));
+        return send(res, 200, { csrfToken: login.csrfToken, expiresAt: login.expiresAt });
+      }
+      const token = cookieToken(req);
+      const session = foundation.auth.session(token);
+      if (method === 'POST') {
+        const csrf = req.headers['x-csrf-token'];
+        if (typeof csrf !== 'string' || Buffer.byteLength(csrf) !== Buffer.byteLength(session.csrfToken) || !timingSafeEqual(Buffer.from(csrf), Buffer.from(session.csrfToken))) {
+          throw new HttpError(403, 'CSRF token required');
+        }
+      }
+      if (method === 'GET' && path === '/api/session') return send(res, 200, { actor: session.actor, csrfToken: session.csrfToken });
+      if (method === 'POST' && path === '/api/logout') {
+        foundation.auth.logout(token!); res.setHeader('Set-Cookie', cookie('', 0)); return send(res, 200, { loggedOut: true });
+      }
+      if (method === 'GET' && path === '/api/requests') return send(res, 200, foundation.listRequests(token!));
+      if (method === 'POST' && path === '/api/requests') return send(res, 201, foundation.createRequest(token!, await jsonBody(req)));
+      const match = /^\/api\/requests\/([^/]+)$/.exec(path);
+      if (method === 'GET' && match?.[1]) {
+        const query = querySchema.parse(Object.fromEntries(url.searchParams));
+        return send(res, 200, foundation.getCase(token!, decodeURIComponent(match[1]), query.version));
+      }
+      const amendment = /^\/api\/requests\/([^/]+)\/versions$/.exec(path);
+      if (method === 'POST' && amendment?.[1]) return send(res, 201, foundation.amendRequest(token!, decodeURIComponent(amendment[1]), await jsonBody(req)));
+      if (method === 'POST' && path === '/api/confirm') return send(res, 200, foundation.confirm(token!, await jsonBody(req)));
+      if (method === 'POST' && path === '/api/approvals') return send(res, 200, foundation.approve(token!, await jsonBody(req)));
+      if (method === 'POST' && path === '/api/proposals') return send(res, 201, foundation.propose(token!, await jsonBody(req)));
+      throw new HttpError(404, 'Route not found');
+    } catch (error) {
+      if (error instanceof HttpError) return send(res, error.status, { error: error.message });
+      if (error instanceof ZodError || error instanceof URIError) return send(res, 400, { error: 'Invalid request' });
+      // No raw database errors, credentials, proposals or evidence in logs/responses.
+      send(res, 500, { error: 'Internal server error' });
+    }
+  });
+  server.requestTimeout = 15000; server.headersTimeout = 10000; server.maxHeadersCount = 64;
+  return server;
+}

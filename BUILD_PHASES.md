@@ -2,6 +2,12 @@
 
 Based on `PROOFIT_FINAL_PLAN.md` v3.1. This document turns the proposal into an implementation sequence; no phase is complete yet. Dates are working targets in Malaysia time, taken from the source plan. External platform capabilities and submission requirements must be checked during implementation.
 
+## Current build evidence — 23 October 2026
+
+Phase 0 is in progress. Shared schema and lifecycle drafts, canonical bindings, four labelled synthetic action scenarios, a 48-slot evaluation manifest and contract tests are implemented. Contract agreement and independent case labels are still pending. The remaining 44 cases are not authored; the four fixtures are action examples, not complete authenticated gateway runs. NVIDIA, Zetaris, Meterless and Stripe configuration are absent from the checked process; live access is NOT_TESTED. No phase exit gate is complete. See docs/CONTRACTS.md and docs/INTEGRATION_ACCESS.md.
+
+Phase 1 foundation work now includes versioned SQLite migrations, synthetic account/resource seed, persistent password/session authentication, scoped request/version/proposal endpoints, exact customer confirmation, role-restricted refund approval and transactional audits. HTTP negative-path, concurrent authority issuance and file-reopen tests pass. Local migrate/seed/start and /health were verified. Investigation/evidence/operation/outcome persistence, gateway/reservation, React and live integrations remain pending. This is implementation evidence for the foundation slice, not a completed phase.
+
 ## Build strategy
 
 Build a narrow working path first: confirmed request → stored proposal → investigation → deterministic decision → protected test execution → observed outcome. Extend that path with refunds, recovery, review, and evaluation.

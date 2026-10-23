@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "frozen": false,
+  "note": "Planning slots only. Cases and labels require independent review; no evaluation results.",
+  "cases": [
+    {
+      "id": "DEV-01",
+      "split": "DEVELOPMENT",
+      "family": "simple-cancellation",
+      "status": "FIXTURE_DRAFT"
+    },
+    {
+      "id": "DEV-02",
+      "split": "DEVELOPMENT",
+      "family": "exact-approved-refund",
+      "status": "FIXTURE_DRAFT"
+    },
+    {
+      "id": "DEV-03",
+      "split": "DEVELOPMENT",
+      "family": "cancel-refund-substitution",
+      "status": "FIXTURE_DRAFT"
+    },
+    {
+      "id": "DEV-04",
+      "split": "DEVELOPMENT",
+      "family": "ambiguous-intent",
+      "status": "FIXTURE_DRAFT"
+    },
+    {
+      "id": "DEV-05",
+      "split": "DEVELOPMENT",
+      "family": "wrong-payment-target",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "DEV-06",
+      "split": "DEVELOPMENT",
+      "family": "fractional-minor-units",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "DEV-07",
+      "split": "DEVELOPMENT",
+      "family": "cross-tenant-record",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "DEV-08",
+      "split": "DEVELOPMENT",
+      "family": "expired-confirmation",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "DEV-09",
+      "split": "DEVELOPMENT",
+      "family": "missing-refund-approval",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "DEV-10",
+      "split": "DEVELOPMENT",
+      "family": "policy-version-change",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "DEV-11",
+      "split": "DEVELOPMENT",
+      "family": "prompt-injection-note",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "DEV-12",
+      "split": "DEVELOPMENT",
+      "family": "stale-memory-pointer",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-01",
+      "split": "HELD_OUT",
+      "family": "annual-renewal-cancellation",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-02",
+      "split": "HELD_OUT",
+      "family": "annual-renewal-cancellation",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-03",
+      "split": "HELD_OUT",
+      "family": "annual-renewal-cancellation",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-04",
+      "split": "HELD_OUT",
+      "family": "annual-renewal-cancellation",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-05",
+      "split": "HELD_OUT",
+      "family": "goodwill-refund-exact-approval",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-06",
+      "split": "HELD_OUT",
+      "family": "goodwill-refund-exact-approval",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-07",
+      "split": "HELD_OUT",
+      "family": "goodwill-refund-exact-approval",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-08",
+      "split": "HELD_OUT",
+      "family": "goodwill-refund-exact-approval",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-09",
+      "split": "HELD_OUT",
+      "family": "separate-confirmed-refund-request",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-10",
+      "split": "HELD_OUT",
+      "family": "separate-confirmed-refund-request",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-11",
+      "split": "HELD_OUT",
+      "family": "separate-confirmed-refund-request",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-12",
+      "split": "HELD_OUT",
+      "family": "separate-confirmed-refund-request",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-13",
+      "split": "HELD_OUT",
+      "family": "cross-customer-subscription",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-14",
+      "split": "HELD_OUT",
+      "family": "cross-customer-subscription",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-15",
+      "split": "HELD_OUT",
+      "family": "cross-customer-subscription",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-16",
+      "split": "HELD_OUT",
+      "family": "inflated-approved-refund",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-17",
+      "split": "HELD_OUT",
+      "family": "inflated-approved-refund",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-18",
+      "split": "HELD_OUT",
+      "family": "inflated-approved-refund",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-19",
+      "split": "HELD_OUT",
+      "family": "reused-authority",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-20",
+      "split": "HELD_OUT",
+      "family": "reused-authority",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-21",
+      "split": "HELD_OUT",
+      "family": "reused-authority",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-22",
+      "split": "HELD_OUT",
+      "family": "forged-approval-role",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-23",
+      "split": "HELD_OUT",
+      "family": "forged-approval-role",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-24",
+      "split": "HELD_OUT",
+      "family": "forged-approval-role",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-25",
+      "split": "HELD_OUT",
+      "family": "altered-request-version",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-26",
+      "split": "HELD_OUT",
+      "family": "altered-request-version",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-27",
+      "split": "HELD_OUT",
+      "family": "disallowed-business-policy",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-28",
+      "split": "HELD_OUT",
+      "family": "disallowed-business-policy",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-29",
+      "split": "HELD_OUT",
+      "family": "immediate-termination-request",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-30",
+      "split": "HELD_OUT",
+      "family": "immediate-termination-request",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-31",
+      "split": "HELD_OUT",
+      "family": "contradictory-approved-sources",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-32",
+      "split": "HELD_OUT",
+      "family": "contradictory-approved-sources",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-33",
+      "split": "HELD_OUT",
+      "family": "missing-policy-passage",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-34",
+      "split": "HELD_OUT",
+      "family": "missing-policy-passage",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-35",
+      "split": "HELD_OUT",
+      "family": "provider-outcome-uncertain",
+      "status": "NOT_AUTHORED"
+    },
+    {
+      "id": "HOLD-36",
+      "split": "HELD_OUT",
+      "family": "provider-outcome-uncertain",
+      "status": "NOT_AUTHORED"
+    }
+  ]
+}
