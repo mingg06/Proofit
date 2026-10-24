@@ -1,3 +1,4 @@
+import { serveConsole } from './console-static.ts';
 import { Investigator } from '../investigator/runner.ts';
 import { jsonBody, send } from './http-utils.ts';
 import { OperationLedger } from './operations.ts';
@@ -28,6 +29,7 @@ export function createApi(foundation: Foundation, origin: string) {
       const url = new URL(req.url ?? '/', origin);
       const path = url.pathname;
       if (req.headers.origin && req.headers.origin !== origin) throw new HttpError(403, 'Origin rejected');
+      if(await serveConsole(req,res))return;
       if (method === 'GET' && path === '/health') return send(res, 200, { status: 'ok', stage: 'PERSISTENT_FOUNDATION', executionEnabled: false });
       if (method === 'POST' && req.headers.origin !== origin) throw new HttpError(403, 'Origin required');
       if (method === 'POST' && path === '/api/login') {
@@ -61,6 +63,7 @@ export function createApi(foundation: Foundation, origin: string) {
       if (method === 'GET' && validationMatch?.[1]) return send(res, 200, gateway.getValidation(token!, decodeURIComponent(validationMatch[1])));
       const operationMatch = /^\/api\/operations\/([^/]+)$/.exec(path);
       if (method === 'GET' && operationMatch?.[1]) return send(res,200,ledger.get(token!,decodeURIComponent(operationMatch[1])));
+      if (method === 'GET' && path === '/api/resources') return send(res,200,foundation.listResources(token!));
       if (method === 'GET' && path === '/api/requests') return send(res, 200, foundation.listRequests(token!));
       if (method === 'POST' && path === '/api/requests') return send(res, 201, foundation.createRequest(token!, await jsonBody(req)));
       const match = /^\/api\/requests\/([^/]+)$/.exec(path);

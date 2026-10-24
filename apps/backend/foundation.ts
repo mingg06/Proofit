@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { approvalInputSchema, approvalSchema, confirmationInputSchema, proposalInputSchema, receiptSchema, type Binding, type Action } from '../../packages/contracts/index.ts';
+import { approvalInputSchema, approvalSchema, confirmationInputSchema, proposalInputSchema, receiptSchema, validationSchema, type Binding, type Action } from '../../packages/contracts/index.ts';
 import { parameterDigest } from '../../packages/contracts/identity.ts';
 import { Auth, HttpError, type Actor } from './auth.ts';
 import { Store } from './database.ts';
@@ -143,6 +143,11 @@ export class Foundation {
       return record;
     });
   }
+  listResources(token:string){
+    const actor=this.auth.session(token).actor;
+    const fields='SELECT id,customer_id AS customerId,kind,provenance FROM resources WHERE tenant_id=?';
+    return actor.role==='CUSTOMER'?this.store.all(fields+' AND customer_id=? ORDER BY kind,id',actor.tenant_id,actor.customer_id):this.store.all(fields+' ORDER BY customer_id,kind,id',actor.tenant_id);
+  }
   listRequests(token: string) {
     const actor = this.auth.session(token).actor;
     if (actor.role === 'CUSTOMER') return this.store.all<RequestRow>('SELECT * FROM requests WHERE tenant_id=? AND customer_id=? ORDER BY created_at DESC LIMIT 100', actor.tenant_id, actor.customer_id);
@@ -153,9 +158,12 @@ export class Foundation {
       const actor = this.auth.session(token).actor;
       const request = this.request(actor, requestId, version);
       const row = this.store.get<ReceiptRow>('SELECT * FROM receipts WHERE tenant_id=? AND request_id=? AND request_version=?', actor.tenant_id, requestId, version);
-      const base = { request, receipt: row ? receiptRecord(row) : null, executionEnabled: false };
+      const latestVersion=this.store.get<{version:number}>('SELECT MAX(version) AS version FROM requests WHERE tenant_id=? AND id=?',actor.tenant_id,requestId)!.version;
+      const operations=this.store.all('SELECT id AS operationId,state,mode,created_at AS createdAt FROM operations WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY created_at,id',actor.tenant_id,requestId,version);
+      const base = { request, latestVersion, operations, receipt: row ? receiptRecord(row) : null, executionEnabled: false };
       if (actor.role === 'CUSTOMER') return base;
-      return { ...base,
+      const validations=this.store.all<{record_json:string;mode:string;rules_version:string}>('SELECT record_json,mode,rules_version FROM validations WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY rowid',actor.tenant_id,requestId,version).map(v=>({...validationSchema.parse(JSON.parse(v.record_json)),mode:v.mode,rulesVersion:v.rules_version}));
+      return { ...base, validations,
         investigations: this.store.all('SELECT id,status,mode,model_id,created_at,validation_id FROM investigations WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY sequence',actor.tenant_id,requestId,version),
         proposals: this.store.all('SELECT id,proposal_json,conversation,created_at FROM proposals WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY created_at,id', actor.tenant_id, requestId, version),
         approvals: row ? this.store.all<ApprovalRow>('SELECT * FROM approvals WHERE tenant_id=? AND receipt_id=?', actor.tenant_id, row.id).map(approvalRecord) : [],

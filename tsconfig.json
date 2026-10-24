@@ -20,5 +20,8 @@
     "tests/**/*.ts",
     "fixtures/**/*.ts",
     "apps/**/*.ts"
+  ],
+  "exclude": [
+    "apps/console"
   ]
 }

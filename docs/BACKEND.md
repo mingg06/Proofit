@@ -1,6 +1,6 @@
 # Persistent foundation API
 
-This local Phase 1 slice stores authenticated accounts/sessions, tenant/customer mappings, request versions, raw proposals, exact-action confirmations, staff approvals, synthetic policy/source metadata and audit events in SQLite. It now also has a deterministic gateway and isolated reservation service (see GATEWAY.md and OPERATIONS.md). It has no investigator, provider submission or React UI. No phase exit gate is declared complete.
+This local Phase 1 slice stores authenticated accounts/sessions, tenant/customer mappings, request versions, raw proposals, exact-action confirmations, staff approvals, synthetic policy/source metadata and audit events in SQLite. It now also has a deterministic gateway and isolated reservation service (see GATEWAY.md and OPERATIONS.md). The React console is now served from the built assets, and bounded investigation/cancellation coordinator code is implemented under the documented controlled provenance. Live provider execution remains disabled. No phase exit gate is declared complete.
 
 ## Setup and commands
 
@@ -79,3 +79,5 @@ The second gateway milestone implements persistent resource leases, atomic opera
 Cancellation outcomes: operation reads now render structured status through outcome-status.ts, requiring a matching provider observation for effect verification. The cancellation executor and durable observer are implemented/tested under controlled provenance (68 tests); no live worker/provider path is enabled. See CANCELLATION.md.
 
 Staff investigation endpoints: POST /api/investigations with {proposalId} starts a new bounded run; GET /api/investigations/:id is recorded replay only. The default model is unconfigured and returns an explicit UNAVAILABLE review hold. See INVESTIGATION.md for budgets, tools, provenance and integration limits.
+
+Console read boundary: GET /api/resources scopes resources to the current customer or staff tenant. Case payloads now include latestVersion and scoped operation references; stored validations remain staff-only. The public index/asset routes expose built UI files only. See FRONTEND.md for build/HMR/current preview and browser verification.

@@ -2,7 +2,7 @@
 
 PROOFIT investigates proposed subscription actions and enforces exact authority before execution. [PROOFIT_FINAL_PLAN.md](PROOFIT_FINAL_PLAN.md) defines the product; [BUILD_PHASES.md](BUILD_PHASES.md) defines the gates.
 
-The initial persistent backend now supports real local password/session authentication, tenant/customer isolation, versioned requests, raw proposals, exact-action confirmations, fixed-role staff approvals and atomic audits. Shared schemas, four synthetic development examples and a draft evaluation manifest are also implemented. Resources/policy are visibly synthetic; no provider actions run. The deterministic rules-only gateway and authenticated isolated reservation service are now implemented. Cancellation submission and durable observation/reconciliation are implemented and tested with controlled providers. Bounded investigation runs, read-only evidence tools, citation validation and recorded run replay are implemented with controlled models. React, eve runtime/model integration, refund submission and all real integration gates remain pending. No phase is declared complete.
+The React console now provides request/confirmation, investigation/review and execution/replay views backed by persistent authenticated APIs. Implemented backend features include exact-action receipts/approvals, deterministic rules, atomic reservations, controlled cancellation/recovery and bounded investigation records. Live NVIDIA/eve, Zetaris, Meterless, real Stripe writes, refund submission, exports and release evaluation remain unfinished. No phase is declared complete; provider writes remain disabled.
 
 ## Run locally
 
@@ -11,63 +11,44 @@ Use Node 24.22.1 and npm:
 ~~~powershell
 npm.cmd ci --ignore-scripts
 npm.cmd run migrate
+# Run seed only for a new empty database:
 npm.cmd run seed
+npm.cmd run build
 npm.cmd run start
 ~~~
 
-The API listens at http://127.0.0.1:3000; GET /health reports its stage. It is an API only, with no browser console yet. Migration and seed are already applied in this workspace; rerunning seed refuses to overwrite accounts. Private random test passwords are in the gitignored .local/test-accounts.json file.
+Open http://127.0.0.1:3000. Migration/seed were already applied in this workspace; seed refuses to overwrite accounts. Random local test credentials are in gitignored .local/test-accounts.json.
 
-The host still defaults to Node 22.13.0. The verified Node 24 fallback is:
+The host defaults to Node 22.13.0. Verified fallback:
 
 ~~~powershell
-npx.cmd --yes --package=node@24.22.1 node scripts/migrate.ts
-npx.cmd --yes --package=node@24.22.1 node scripts/seed.ts
+npx.cmd --yes --package=node@24.22.1 node node_modules/vite/bin/vite.js build --config apps/console/vite.config.ts
 npx.cmd --yes --package=node@24.22.1 node apps/backend/main.ts
 ~~~
 
-See [backend setup and API examples](docs/BACKEND.md) for login, confirmation, approval, configuration and limits. Backend startup rejects Stripe execution credentials.
+The current preview uses http://127.0.0.1:3002 because port 3000 already had a service. See [frontend setup](docs/FRONTEND.md) for ports, HMR development and browser verification, and [backend API setup](docs/BACKEND.md) for authority contracts.
 
 ## Verify
 
-With Node 24 active:
-
 ~~~powershell
 npm.cmd run check
-npm.cmd run scenarios
-npm.cmd run preflight
+npm.cmd run build
+npm.cmd run browser:install
+npm.cmd run test:browser
 ~~~
 
-Verified fallback commands on this host:
+Verified: server/browser/e2e TypeScript, 87 Node tests, 8 Chromium workflows and accessibility checks on the tested light/dark views. Browser fixtures are visibly CONTROLLED_TEST; they do not make provider calls.
 
-~~~powershell
-npx.cmd --yes --package=node@24.22.1 node node_modules/typescript/bin/tsc --noEmit
-npx.cmd --yes --package=node@24.22.1 node --test tests/*.test.ts
-npx.cmd --yes --package=node@24.22.1 node scripts/scenarios.ts
-npx.cmd --yes --package=node@24.22.1 node scripts/preflight.ts
-~~~
-
-Preflight currently exits 1 because sponsor/provider configuration is missing. It reports names and presence only, makes no remote calls and does not prove live access. .env.example contains names only; scripts do not load .env files automatically. npm run dev watches the backend. No application bundle/build or React development command exists yet.
+Node 24 host fallbacks use the same node invocation above with node_modules/typescript/bin/tsc --noEmit, --test tests/*.test.ts, or scripts/browser-tests.ts. Existing migrate, seed, scenarios, preflight, stripe:probe and nvidia:probe scripts remain available. Preflight/probes report missing integration configuration honestly and do not establish live access from variable presence. Scripts do not load .env files automatically.
 
 ## Source boundaries
 
-- apps/backend: local HTTP API, persistent authentication, rules-only gateway, authority/operation ledger, SQLite store/configuration and synthetic seed.
-- apps/executor: isolated service-authenticated reservation boundary; live provider writes disabled.
-- migrations: versioned relational schema; migration integrity checked on startup.
-- packages/contracts: shared schemas, canonical binding and operation identity/transition definitions.
-- fixtures: synthetic action examples; no live inference or provider records.
-- scripts: migrate, seed, fixture inspection and configuration presence checks.
-- tests: contract boundaries, HTTP authority/isolation, transaction/restart behavior and dataset split checks.
-- evaluation/manifest.json: 12 development and 36 held-out authoring slots, not a frozen dataset.
-- evaluation/reviewer-only: provisional expectations; exclude from every model/tool-visible source.
+- apps/console: React/TypeScript views, typed same-origin client, design tokens and Vite configuration.
+- apps/backend: persistent authentication, scoped APIs, deterministic gateway, authority/operation ledger and safe static delivery.
+- apps/executor: isolated authenticated boundary and controlled cancellation submission/observation/recovery; default live writes disabled.
+- apps/investigator: bounded coordinator, read-only scoped tools, recorded runs/citations and NVIDIA access probe; eve/live integration pending.
+- migrations and packages/contracts: versioned relational schema and shared runtime schemas.
+- tests and e2e: negative authority/persistence checks and real browser flows using separate local test data.
+- evaluation: draft development/held-out authoring manifest; reviewer-only labels stay outside agent-visible tools.
 
-See [contract decisions](docs/CONTRACTS.md) and [integration access record](docs/INTEGRATION_ACCESS.md). Next on the critical path: approved live retrieval/provider-state access and the isolated test-provider submission/reconciliation path; live integrations retain their access gates.
-
-Deterministic validation is now implemented: see [gateway behavior and provenance](docs/GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation is implemented behind the authenticated isolated service; provider execution remains disabled.
-
-The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](docs/OPERATIONS.md). Provider submission/reconciliation remain unimplemented.
-
-A pinned Stripe cancellation adapter and read-only access probe are implemented but live submission remains unwired. See [cancellation integration](docs/CANCELLATION.md).
-
-Cancellation execution/recovery milestone: durable one-attempt submission, observation-backed scheduling status and restart-safe read-only reconciliation are implemented. All 68 tests and TypeScript pass. Default runtime still has no live cancellation route; no genuine provider action is claimed. See [cancellation execution details](docs/CANCELLATION.md).
-
-The [bounded investigation foundation](docs/INVESTIGATION.md) now persists request-scoped runs/findings/events, enforces budgets, and holds failed/unresolved investigations through rules-v3. The default API has no verified model and records UNAVAILABLE. TypeScript and 84 tests pass. nvidia:probe reports missing configuration honestly; no real inference is claimed.
+See [gateway](docs/GATEWAY.md), [operations](docs/OPERATIONS.md), [cancellation](docs/CANCELLATION.md), [investigation](docs/INVESTIGATION.md) and [integration access](docs/INTEGRATION_ACCESS.md) for verified work and unfinished gates.
