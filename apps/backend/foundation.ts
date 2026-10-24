@@ -1,3 +1,6 @@
+import { outcomeStatus } from './outcome-status.ts';
+import type { OperationRow } from './operations.ts';
+import { enqueueReview } from './review-jobs.ts';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { approvalInputSchema, approvalSchema, confirmationInputSchema, proposalInputSchema, receiptSchema, validationSchema, type Binding, type Action } from '../../packages/contracts/index.ts';
@@ -19,10 +22,12 @@ function approvalRecord(row: ApprovalRow) {
     approverActorId: row.actor_id, approverRole: row.approver_role, createdAt: row.created_at, expiresAt: row.expires_at, consumedByOperationId: row.consumed_by_operation_id });
 }
 export class Foundation {
+  readonly automatedReviewAvailable: boolean;
   readonly store: Store;
   readonly auth: Auth;
   readonly now: () => Date;
-  constructor(store: Store, now: () => Date = () => new Date()) {
+  constructor(store: Store, now: () => Date = () => new Date(), automatedReviewAvailable = false) {
+    this.automatedReviewAvailable = automatedReviewAvailable;
     this.store = store; this.now = now; this.auth = new Auth(store, now);
   }
   private audit(actor: Actor, request: RequestRow, event: string, detail: unknown): void {
@@ -90,12 +95,14 @@ export class Foundation {
         if (old.parameter_digest !== digest || parameterDigest(receiptRecord(old).binding) !== digest || old.expires_at <= this.now().toISOString() || old.consumed_by_operation_id) {
           throw new HttpError(409, 'Authority changed, expired or consumed; create a new request version');
         }
+        enqueueReview(this.store,receiptRecord(old),this.now(),this.automatedReviewAvailable);
         return receiptRecord(old);
       }
       const record = receiptSchema.parse({ receiptId: randomUUID(), binding, parameterDigest: digest,
         createdAt: this.now().toISOString(), expiresAt: new Date(this.now().getTime() + 15 * 60 * 1000).toISOString(), consumedByOperationId: null });
       this.store.run('INSERT INTO receipts VALUES(?,?,?,?,?,?,?,?,?)', record.receiptId, actor.tenant_id, request.id, request.version,
         JSON.stringify(binding), digest, record.createdAt, record.expiresAt, null);
+      enqueueReview(this.store,record,this.now(),this.automatedReviewAvailable);
       this.audit(actor, request, 'CUSTOMER_CONFIRMED', { receiptId: record.receiptId, parameterDigest: digest });
       return record;
     });
@@ -139,6 +146,7 @@ export class Foundation {
         createdAt: this.now().toISOString(), expiresAt: receipt.expiresAt, consumedByOperationId: null });
       this.store.run('INSERT INTO approvals VALUES(?,?,?,?,?,?,?,?,?)', record.approvalId, actor.tenant_id, record.receiptId, record.bindingDigest,
         actor.id, actor.role, record.createdAt, record.expiresAt, null);
+      if(this.automatedReviewAvailable)this.store.run("UPDATE review_jobs SET status='QUEUED',message='Exact refund approval recorded; awaiting fresh investigation.',updated_at=? WHERE receipt_id=? AND status='REVIEW_REQUIRED' AND operation_id IS NULL",this.now().toISOString(),receipt.receiptId);
       this.audit(actor, request, 'STAFF_APPROVED', { approvalId: record.approvalId, receiptId: record.receiptId, parameterDigest: record.bindingDigest });
       return record;
     });
@@ -154,13 +162,20 @@ export class Foundation {
     return this.store.all<RequestRow>('SELECT * FROM requests WHERE tenant_id=? ORDER BY created_at DESC LIMIT 100', actor.tenant_id);
   }
   getCase(token: string, requestId: string, version: number) {
-    return this.store.transaction(() => {
+    return this.store.transaction(() => this.readCase(token,requestId,version));
+  }
+  // Scoped read used inside a caller-owned snapshot transaction (exports).
+  readCase(token: string, requestId: string, version: number) {
       const actor = this.auth.session(token).actor;
       const request = this.request(actor, requestId, version);
       const row = this.store.get<ReceiptRow>('SELECT * FROM receipts WHERE tenant_id=? AND request_id=? AND request_version=?', actor.tenant_id, requestId, version);
       const latestVersion=this.store.get<{version:number}>('SELECT MAX(version) AS version FROM requests WHERE tenant_id=? AND id=?',actor.tenant_id,requestId)!.version;
       const operations=this.store.all('SELECT id AS operationId,state,mode,created_at AS createdAt FROM operations WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY created_at,id',actor.tenant_id,requestId,version);
-      const base = { request, latestVersion, operations, receipt: row ? receiptRecord(row) : null, executionEnabled: false };
+      const job=this.store.get<{status:string;message:string;created_at:string;updated_at:string;operation_id:string|null}>('SELECT status,message,created_at,updated_at,operation_id FROM review_jobs WHERE tenant_id=? AND request_id=? AND request_version=?',actor.tenant_id,requestId,version);
+      const linked=job?.operation_id?this.store.get<OperationRow>('SELECT * FROM operations WHERE tenant_id=? AND id=? AND request_id=? AND request_version=?',actor.tenant_id,job.operation_id,requestId,version):null;
+      const observed=linked?outcomeStatus(this.store,linked):null;
+      const automation=job?{status:observed?.effectVerified?'OBSERVED':linked?.state??job.status,message:observed?.statusText??job.message,created_at:job.created_at,updated_at:linked?.updated_at??job.updated_at}:null;
+      const base = { request, latestVersion, operations, automation, receipt: row ? receiptRecord(row) : null, executionEnabled: false };
       if (actor.role === 'CUSTOMER') return base;
       const validations=this.store.all<{record_json:string;mode:string;rules_version:string}>('SELECT record_json,mode,rules_version FROM validations WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY rowid',actor.tenant_id,requestId,version).map(v=>({...validationSchema.parse(JSON.parse(v.record_json)),mode:v.mode,rulesVersion:v.rules_version}));
       return { ...base, validations,
@@ -169,6 +184,5 @@ export class Foundation {
         approvals: row ? this.store.all<ApprovalRow>('SELECT * FROM approvals WHERE tenant_id=? AND receipt_id=?', actor.tenant_id, row.id).map(approvalRecord) : [],
         auditEvents: this.store.all('SELECT sequence,id,actor_id,event,detail_json,created_at FROM audit_events WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY sequence', actor.tenant_id, requestId, version),
       };
-    });
   }
 }

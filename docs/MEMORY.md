@@ -1,0 +1,9 @@
+# Scoped working memory
+
+apps/investigator/memory.ts is a local direct-capture working-tier subset based on the [Meterless H-MEM implementation specification](https://github.com/Meterless/Meterless/blob/main/engines/hmem/AGENTS.md), inspected 24 October 2026. Meterless describes an implementation specification rather than a required hosted runtime library. No Meterless account/token is required for this local subset. Full H-MEM ranking, graph enrichment, dreaming, sleep/consolidation and conformance are outside this subset; no full-engine integration is claimed.
+
+Migration 008 persists working_memories and a mutation/recall audit. Each memory carries source run, explicit untrusted provenance, working tier, exact tenant/customer/request/version namespace, policy-content digest, mode, timestamps, access counters, expiry and lineage. Confidence 1 describes certainty that an issue was recorded; it does not make the issue true or grant approval. Only schema-valid unresolved model output is captured; UNAVAILABLE and failed runs are not fabricated model memories.
+
+Recall is staff-authorized and limited to five records with the same exact scope, mode, policy digest and unexpired 24-hour lifetime. Before model use, all remembered evidence pointers are re-fetched through scoped approved-source tools. These lookups consume the same 10-call/45-second budget. Revoked/missing/stale evidence holds the run. Model context labels the memory as untrusted and authority=false. Receipts, approvals, rules and the operation ledger are reloaded independently; memory never changes them.
+
+Controlled tests verify database reopen/recall, authoritative source re-fetching, policy/request/version isolation, revoked passages and budget exhaustion. Genuine case persistence/retrieval must still be verified during integration.

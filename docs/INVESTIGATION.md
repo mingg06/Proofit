@@ -41,3 +41,11 @@ It uses the official fixed HTTPS endpoint and asks for a tiny exact JSON object;
 References checked: https://eve.dev/docs/agent-config and https://docs.api.nvidia.com/nim/reference/llm-apis .
 
 Verification: TypeScript and 84 tests pass, covering bounded calls/time, malformed/forged output, citation freshness, injection/tool boundaries, scope isolation, old-READY holds, concurrent starts, fresh run IDs, and file-reopen replay without model/provider calls. Live sponsor integration, scoped Meterless memory, eve adapter and real investigator evaluation remain unfinished.
+
+## Working local extensions
+
+Migration 007 records generic retrieval-query provenance for replay; the optional read-only EvidenceRetrieval interface is independent of any external provider implementation. No retrieval adapter is installed in default startup. Migration 008 stores a scoped direct-capture H-MEM working tier; recalled pointers are re-fetched under the same budgets and never grant authority. See MEMORY.md.
+
+Migration 009 records exact-confirmation review jobs. ReviewPipeline provides code-only proposing/investigating/eligibility/execution orchestration using existing authority/ledger services. Default startup keeps automation unavailable and submission disabled. Models and service credentials never come from public route parameters.
+
+The review comparison can pre-fetch stored evidence for one-shot review and use scoped memory in full review. Fingerprints reject changes to source references, exact authority, policy, memory or provider state between isolated variants. All 12 authored development cases run 36 controlled reviews. See DEVELOPMENT_CASES.md. No genuine inference, external retrieval, provider write, held-out acceptance or investigator benefit is claimed.

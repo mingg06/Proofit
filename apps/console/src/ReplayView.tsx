@@ -1,3 +1,4 @@
+import { useMutation } from "./forms.tsx";
 import { useEffect, useState } from "react";
 import type {
   Actor,
@@ -33,6 +34,7 @@ function Evidence({ value }: { value: string }) {
   );
 }
 export function ReplayView({ data, actor }: { data: Case; actor: Actor }) {
+  const download = useMutation();
   const [operationId, setOperationId] = useState(
     data.operations.at(-1)?.operationId ?? "",
   );
@@ -85,6 +87,38 @@ export function ReplayView({ data, actor }: { data: Case; actor: Actor }) {
   const unresolved = replay ? json(replay.run.unresolved_json) : null;
   return (
     <div className="stack large-gap">
+      <div className="export-toolbar">
+        <p className="small muted">
+          Download this version’s stored history and observed outcomes.
+        </p>
+        <button
+          className="button secondary"
+          disabled={download.busy}
+          onClick={() =>
+            void download.run(async () => {
+              const packet = await api.request(
+                "/requests/" +
+                  encodeURIComponent(data.request.id) +
+                  "/export?version=" +
+                  data.request.version,
+              );
+              const url = URL.createObjectURL(
+                new Blob([JSON.stringify(packet, null, 2)], {
+                  type: "application/json",
+                }),
+              );
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "proofit-case-v" + data.request.version + ".json";
+              link.click();
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+            })
+          }
+        >
+          {download.busy ? "Preparing export…" : "Export recorded case"}
+        </button>
+      </div>
+      {download.error && <Notice error>{download.error}</Notice>}
       <section className="panel">
         <div className="panel-heading">
           <div>
@@ -176,12 +210,14 @@ export function ReplayView({ data, actor }: { data: Case; actor: Actor }) {
                 <dt>Observed at</dt>
                 <dd>{dateTime(operation.observation?.observedAt)}</dd>
               </div>
-              {operation.observation?.periodEnd && (
-                <div>
-                  <dt>Recorded period end</dt>
-                  <dd>{dateTime(operation.observation.periodEnd)}</dd>
-                </div>
-              )}
+              {operation.observation &&
+                "periodEnd" in operation.observation &&
+                operation.observation.periodEnd && (
+                  <div>
+                    <dt>Recorded period end</dt>
+                    <dd>{dateTime(operation.observation.periodEnd)}</dd>
+                  </div>
+                )}
             </dl>
           </>
         ) : (

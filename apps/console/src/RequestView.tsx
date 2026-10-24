@@ -37,6 +37,28 @@ export function RequestView({
   }
   return (
     <div className="stack large-gap">
+      {data.automation && (
+        <section
+          className="panel automation-status"
+          aria-label="Automatic processing status"
+        >
+          <div className="panel-heading">
+            <h2>Automatic processing</h2>
+            <Badge value={data.automation.status}>
+              {data.automation.status.replaceAll("_", " ")}
+            </Badge>
+          </div>
+          <p>
+            {customer && data.automation.status === "UNAVAILABLE"
+              ? "Your confirmation is saved. Automatic processing is unavailable; no provider action has been verified."
+              : data.automation.message}
+          </p>
+          <p className="small muted">
+            Confirmation records your intent. Execution still requires backend
+            eligibility and any required refund approval.
+          </p>
+        </section>
+      )}
       <section className="panel">
         <div className="panel-heading">
           <div>

@@ -1,3 +1,4 @@
+import { refundObservationSchema } from "./refund.ts";
 import { z } from "zod";
 import {
   receiptSchema,
@@ -40,6 +41,15 @@ export const caseSchema = z.object({
   request: requestSchema,
   latestVersion: z.number().int(),
   receipt: receiptSchema.nullable(),
+  automation: z
+    .object({
+      status: z.string(),
+      message: z.string(),
+      created_at: z.string(),
+      updated_at: z.string(),
+    })
+    .nullable()
+    .optional(),
   executionEnabled: z.literal(false),
   operations: z.array(
     z.object({
@@ -130,7 +140,9 @@ export const operationViewSchema = z.object({
   effectVerified: z.boolean(),
   providerObjectId: z.string().nullable(),
   statusText: z.string(),
-  observation: cancellationObservationSchema.nullable(),
+  observation: z
+    .union([cancellationObservationSchema, refundObservationSchema])
+    .nullable(),
   executionEnabled: z.literal(false),
 });
 export type Actor = z.infer<typeof actorSchema>;

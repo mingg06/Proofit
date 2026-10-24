@@ -3,9 +3,9 @@ import { existsSync } from 'node:fs';
 const required = {
   nvidia: ['NVIDIA_API_KEY', 'NVIDIA_MODEL_ID'],
   zetaris: ['ZETARIS_BASE_URL', 'ZETARIS_TOKEN', 'ZETARIS_STRUCTURED_SOURCE_ID', 'ZETARIS_POLICY_SOURCE_ID'],
-  meterless: ['METERLESS_BASE_URL', 'METERLESS_TOKEN'],
   executor: ['STRIPE_TEST_SECRET_KEY', 'EXECUTOR_SERVICE_SECRET'],
 };
+console.log(JSON.stringify({service:'meterless-memory',implementation:'SCOPED_LOCAL_HMEM_WORKING_SUBSET',remoteCredentialsRequired:false,fullHmemConformance:'NOT_TESTED',genuineCasePersistence:'NOT_TESTED'}));
 let missingAny = false;
 console.log(JSON.stringify({ service: 'backend', databaseFilePresent: existsSync(process.env.DATABASE_PATH?.trim() || '.local/proofit.sqlite'), sessionMode: 'OPAQUE_PERSISTENT_TOKENS', remoteAccessRequired: false }));
 console.log(JSON.stringify({ node: process.version, compatible: Number(process.versions.node.split('.')[0]) === 24 }));

@@ -22,7 +22,8 @@
     "dev:console": "vite --config apps/console/vite.config.ts",
     "build": "vite build --config apps/console/vite.config.ts",
     "browser:install": "node scripts/browser-tests.ts install",
-    "test:browser": "node scripts/browser-tests.ts"
+    "test:browser": "node scripts/browser-tests.ts",
+    "test:development": "node scripts/development-cases.ts"
   },
   "dependencies": {
     "react": "19.3.1",

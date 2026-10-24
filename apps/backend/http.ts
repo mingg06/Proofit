@@ -1,3 +1,4 @@
+import { exportCase } from './exports.ts';
 import { serveConsole } from './console-static.ts';
 import { Investigator } from '../investigator/runner.ts';
 import { jsonBody, send } from './http-utils.ts';
@@ -70,6 +71,12 @@ export function createApi(foundation: Foundation, origin: string) {
       if (method === 'GET' && match?.[1]) {
         const query = querySchema.parse(Object.fromEntries(url.searchParams));
         return send(res, 200, foundation.getCase(token!, decodeURIComponent(match[1]), query.version));
+      }
+      const exportMatch=/^\/api\/requests\/([^/]+)\/export$/.exec(path);
+      if(method==='GET'&&exportMatch?.[1]){
+        const query=querySchema.parse(Object.fromEntries(url.searchParams));
+        res.setHeader('Content-Disposition','attachment; filename="proofit-case-v'+query.version+'.json"');
+        return send(res,200,exportCase(foundation,token!,decodeURIComponent(exportMatch[1]),query.version));
       }
       const amendment = /^\/api\/requests\/([^/]+)\/versions$/.exec(path);
       if (method === 'POST' && amendment?.[1]) return send(res, 201, foundation.amendRequest(token!, decodeURIComponent(amendment[1]), await jsonBody(req)));

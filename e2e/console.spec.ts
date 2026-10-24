@@ -272,6 +272,15 @@ test("an unavailable investigation is recorded honestly and replay/reload cannot
       { exact: true },
     ),
   ).toBeVisible();
+  const downloaded = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export recorded case" }).click();
+  const download = await downloaded;
+  const downloadedPath = await download.path();
+  const packet = JSON.parse(await readFile(downloadedPath!, "utf8"));
+  expect(packet.payload.visibility).toBe("STAFF");
+  expect(packet.payload.recordedOnly).toBe(true);
+  expect(packet.payload.investigations.length).toBe(1);
+  expect(packet.sha256).toMatch(/^[a-f0-9]{64}$/);
   expect(starts).toBe(1);
   await page.getByText("recorded events", { exact: false }).click();
   await page.evaluate(() => window.scrollTo(0, 0));

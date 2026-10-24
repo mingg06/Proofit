@@ -4,7 +4,7 @@ import { config } from '../apps/backend/config.ts';
 import { Store } from '../apps/backend/database.ts';
 
 test('local backend configuration rejects provider execution secrets and unsafe origins', () => {
-  const names = ['PORT', 'APP_ORIGIN', 'DATABASE_PATH', 'STRIPE_TEST_SECRET_KEY'] as const;
+  const names = ['PORT', 'APP_ORIGIN', 'DATABASE_PATH', 'STRIPE_TEST_SECRET_KEY', 'BIND_HOST'] as const;
   const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
   try {
     for (const name of names) delete process.env[name];
@@ -17,8 +17,9 @@ test('local backend configuration rejects provider execution secrets and unsafe 
       process.env.APP_ORIGIN = origin;
       assert.throws(() => config());
     }
+    process.env.BIND_HOST='0.0.0.0';process.env.APP_ORIGIN='http://127.0.0.1:3000';assert.throws(()=>config(),/HTTPS/);
     process.env.APP_ORIGIN = 'https://proofit.example';
-    assert.equal(config().origin, 'https://proofit.example');
+    assert.equal(config().origin, 'https://proofit.example');assert.equal(config().bindHost,'0.0.0.0');
   } finally {
     for (const name of names) { const value = previous[name]; if (value === undefined) delete process.env[name]; else process.env[name] = value; }
   }

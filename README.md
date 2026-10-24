@@ -2,7 +2,7 @@
 
 PROOFIT investigates proposed subscription actions and enforces exact authority before execution. [PROOFIT_FINAL_PLAN.md](PROOFIT_FINAL_PLAN.md) defines the product; [BUILD_PHASES.md](BUILD_PHASES.md) defines the gates.
 
-The React console now provides request/confirmation, investigation/review and execution/replay views backed by persistent authenticated APIs. Implemented backend features include exact-action receipts/approvals, deterministic rules, atomic reservations, controlled cancellation/recovery and bounded investigation records. Live NVIDIA/eve, Zetaris, Meterless, real Stripe writes, refund submission, exports and release evaluation remain unfinished. No phase is declared complete; provider writes remain disabled.
+The React console now provides request/confirmation, investigation/review and execution/replay views backed by persistent authenticated APIs. Implemented backend features include exact-action receipts/approvals, deterministic rules, atomic reservations, controlled cancellation/recovery and bounded investigation records. Controlled refund execution/recovery, scoped exports, persistent review jobs, local working memory and all 12 runnable development cases are now implemented. Real NVIDIA/eve/Zetaris integration, provider runtime activation, public deployment and independent release evaluation remain unfinished. No phase is declared complete; provider writes remain disabled.
 
 ## Run locally
 
@@ -37,7 +37,7 @@ npm.cmd run browser:install
 npm.cmd run test:browser
 ~~~
 
-Verified: server/browser/e2e TypeScript, 87 Node tests, 8 Chromium workflows and accessibility checks on the tested light/dark views. Browser fixtures are visibly CONTROLLED_TEST; they do not make provider calls.
+Verified: server/browser/e2e TypeScript, 128 Node tests, 8 Chromium workflows and accessibility checks on the tested light/dark views. Browser fixtures are visibly CONTROLLED_TEST; they do not make provider calls.
 
 Node 24 host fallbacks use the same node invocation above with node_modules/typescript/bin/tsc --noEmit, --test tests/*.test.ts, or scripts/browser-tests.ts. Existing migrate, seed, scenarios, preflight, stripe:probe and nvidia:probe scripts remain available. Preflight/probes report missing integration configuration honestly and do not establish live access from variable presence. Scripts do not load .env files automatically.
 
@@ -52,3 +52,9 @@ Node 24 host fallbacks use the same node invocation above with node_modules/type
 - evaluation: draft development/held-out authoring manifest; reviewer-only labels stay outside agent-visible tools.
 
 See [gateway](docs/GATEWAY.md), [operations](docs/OPERATIONS.md), [cancellation](docs/CANCELLATION.md), [investigation](docs/INVESTIGATION.md) and [integration access](docs/INTEGRATION_ACCESS.md) for verified work and unfinished gates.
+
+Working local features include the shared cancellation/refund coordinator, authenticated executor client, exact-amount authority checks, observation-derived statuses, customer/staff snapshot exports and replay. All provider submission routes stay disabled in default startup. Runtime assembly helpers are code-only libraries; no verified model/provider runtime is installed.
+
+Run npm.cmd run test:development with Node 24 (fallback: npx.cmd --yes --package=node@24.22.1 node scripts/development-cases.ts). It runs 12 in-memory development cases through 36 CONTROLLED_TEST reviews and saves an ignored report. No held-out labels or provider submissions are used. See docs/DEVELOPMENT_CASES.md, docs/REFUNDS.md, docs/EXPORTS.md and docs/MEMORY.md.
+
+The private-network BIND_HOST override requires an explicit HTTPS APP_ORIGIN; local default remains loopback. PROOFIT_AUTOMATIC_REVIEW sets queue availability only and never grants execution authority. Deployment and real integration activation remain gated.

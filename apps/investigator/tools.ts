@@ -3,10 +3,12 @@ import { evidenceSchema } from '../../packages/contracts/index.ts';
 import { lookupSchema } from '../../packages/contracts/investigation.ts';
 import { Gateway,parsedJson } from '../backend/gateway.ts';
 import { HttpError } from '../backend/auth.ts';
+import type { EvidenceRetrieval } from './retrieval.ts';
 export type RunScope={id:string;tenant_id:string;customer_id:string;request_id:string;request_version:number;proposal_id:string;actor_id:string};
 export class EvidenceTools {
  readonly gateway:Gateway;readonly scope:RunScope;readonly token:string;
- constructor(gateway:Gateway,scope:RunScope,token:string){this.gateway=gateway;this.scope=scope;this.token=token;}
+ readonly retrieval:EvidenceRetrieval|undefined;private retrieved=false;
+ constructor(gateway:Gateway,scope:RunScope,token:string,retrieval?:EvidenceRetrieval){this.gateway=gateway;this.scope=scope;this.token=token;this.retrieval=retrieval;}
  authorize(){const run=this.gateway.store.get<{status:string}>('SELECT status FROM investigations WHERE id=?',this.scope.id);if(run?.status!=='RUNNING')throw new HttpError(409,'Investigation is no longer active');const actor=this.gateway.auth.session(this.token).actor;this.gateway.staff(actor);if(actor.id!==this.scope.actor_id||actor.tenant_id!==this.scope.tenant_id)throw new HttpError(403,'Investigation scope changed');return this.gateway.load(actor,this.scope.proposal_id);}
  resolve(evidenceId:string){
   const snapshot=this.authorize();const s=this.scope;const row=this.gateway.store.get<{record_json:string;purpose:string}>('SELECT record_json,purpose FROM evidence_records WHERE tenant_id=? AND request_id=? AND request_version=? AND id=?',s.tenant_id,s.request_id,s.request_version,evidenceId);
@@ -18,19 +20,31 @@ export class EvidenceTools {
   return {purpose:row.purpose,record};
  }
  private remember(evidenceId:string){const item=this.resolve(evidenceId);this.gateway.store.run('INSERT INTO investigation_evidence VALUES(?,?,?) ON CONFLICT(run_id,evidence_id) DO NOTHING',this.scope.id,evidenceId,JSON.stringify(item.record));return item;}
- async call(raw:unknown){
-  const call=lookupSchema.parse(raw);const snapshot=this.authorize();const s=this.scope;
+ async call(raw:unknown,signal:AbortSignal=new AbortController().signal){
+  const call=lookupSchema.parse(raw);this.authorize();
+  if(this.retrieval&&!this.retrieved&&['read_request_receipt','search_approved_policy','read_case_record'].includes(call.tool)){
+   await this.retrieval.refresh(this,signal);signal.throwIfAborted();this.retrieved=true;
+  }
+  const snapshot=this.authorize();const s=this.scope;
   switch(call.tool){
-   case 'read_request_receipt':{const ids=this.gateway.store.all<{id:string}>('SELECT id FROM evidence_records WHERE tenant_id=? AND request_id=? AND request_version=? AND purpose=? ORDER BY id LIMIT 5',s.tenant_id,s.request_id,s.request_version,'REQUEST');return {source:'LOCAL_STORED',receipt:snapshot.receipt,requestEvidence:ids.map(row=>this.remember(row.id))};}
+   case 'read_request_receipt':{const ids=this.evidenceIds('REQUEST');return {source:'LOCAL_STORED',receipt:snapshot.receipt,requestEvidence:ids.slice(0,5).map(row=>this.remember(row.id))};}
    case 'get_prior_attempts':return {source:'LOCAL_LEDGER',operations:this.gateway.store.all('SELECT id,state,provider_object_id FROM operations WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY created_at,id LIMIT 50',s.tenant_id,s.request_id,s.request_version)};
    case 'validate_proposal':{const v=await this.gateway.validate(this.token,{proposalId:s.proposal_id});return {validationId:v.validationId,decision:v.decision,checks:v.checks};}
-   case 'read_case_record':return this.remember(call.input.evidenceId);
+   case 'read_case_record':{
+    if(this.retrieved&&!this.gateway.store.get('SELECT l.evidence_id FROM retrieval_evidence l JOIN retrieval_queries q ON q.id=l.query_id WHERE q.run_id=? AND l.evidence_id=?',s.id,call.input.evidenceId))throw new HttpError(404,'Evidence was not retrieved for this run');
+    return this.remember(call.input.evidenceId);
+   }
    case 'search_approved_policy':{
-    const rows=this.gateway.store.all<{id:string}>('SELECT id FROM evidence_records WHERE tenant_id=? AND request_id=? AND request_version=? AND purpose=? ORDER BY id LIMIT 50',s.tenant_id,s.request_id,s.request_version,'POLICY');
+    const rows=this.evidenceIds('POLICY');
     const found=[];for(const row of rows){const item=this.resolve(row.id);if(item.record.excerpt.toLowerCase().includes(call.input.query.toLowerCase()))found.push(this.remember(row.id));if(found.length===5)break;}
     return {source:'LOCAL_STORED_APPROVED_PASSAGES',results:found};
    }
   }
+ }
+ private evidenceIds(purpose:string){
+  const s=this.scope;
+  if(this.retrieved)return this.gateway.store.all<{id:string}>('SELECT e.id FROM evidence_records e JOIN retrieval_evidence l ON l.evidence_id=e.id JOIN retrieval_queries q ON q.id=l.query_id WHERE q.run_id=? AND e.purpose=? ORDER BY e.id',s.id,purpose);
+  return this.gateway.store.all<{id:string}>('SELECT id FROM evidence_records WHERE tenant_id=? AND request_id=? AND request_version=? AND purpose=? ORDER BY id LIMIT 50',s.tenant_id,s.request_id,s.request_version,purpose);
  }
  verifyCitations(findings:z.infer<typeof import('../../packages/contracts/index.ts').investigatorOutputSchema>['findings']){
   const saved=this.gateway.store.all<{evidence_id:string;record_json:string}>('SELECT * FROM investigation_evidence WHERE run_id=?',this.scope.id);

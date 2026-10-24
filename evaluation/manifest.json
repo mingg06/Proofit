@@ -1,79 +1,79 @@
 {
   "version": 1,
   "frozen": false,
-  "note": "Planning slots only. Cases and labels require independent review; no evaluation results.",
+  "note": "12 development dossiers authored with controlled runnable trials; held-out slots and independent review remain unfinished. No genuine evaluation results.",
   "cases": [
     {
       "id": "DEV-01",
       "split": "DEVELOPMENT",
       "family": "simple-cancellation",
-      "status": "FIXTURE_DRAFT"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-02",
       "split": "DEVELOPMENT",
       "family": "exact-approved-refund",
-      "status": "FIXTURE_DRAFT"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-03",
       "split": "DEVELOPMENT",
       "family": "cancel-refund-substitution",
-      "status": "FIXTURE_DRAFT"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-04",
       "split": "DEVELOPMENT",
       "family": "ambiguous-intent",
-      "status": "FIXTURE_DRAFT"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-05",
       "split": "DEVELOPMENT",
       "family": "wrong-payment-target",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-06",
       "split": "DEVELOPMENT",
       "family": "fractional-minor-units",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-07",
       "split": "DEVELOPMENT",
       "family": "cross-tenant-record",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-08",
       "split": "DEVELOPMENT",
       "family": "expired-confirmation",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-09",
       "split": "DEVELOPMENT",
       "family": "missing-refund-approval",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-10",
       "split": "DEVELOPMENT",
       "family": "policy-version-change",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-11",
       "split": "DEVELOPMENT",
       "family": "prompt-injection-note",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "DEV-12",
       "split": "DEVELOPMENT",
       "family": "stale-memory-pointer",
-      "status": "NOT_AUTHORED"
+      "status": "AUTHORED_CONTROLLED_DRAFT"
     },
     {
       "id": "HOLD-01",
