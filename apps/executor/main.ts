@@ -1,0 +1,18 @@
+import { resolve,dirname } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { z } from 'zod';
+import { Store } from '../backend/database.ts';
+import { Gateway } from '../backend/gateway.ts';
+import { OperationLedger } from '../backend/operations.ts';
+import { createExecutorApi } from './http.ts';
+if(Number(process.versions.node.split('.')[0])!==24)throw new Error('PROOFIT requires Node 24');
+if(process.env.STRIPE_TEST_SECRET_KEY?.trim())throw new Error('Provider submission is not implemented; omit provider credentials until the live gate passes');
+const secret=z.string().min(32).parse(process.env.EXECUTOR_SERVICE_SECRET);
+const path=resolve(process.env.DATABASE_PATH?.trim()||'.local/proofit.sqlite');
+const port=z.coerce.number().int().min(1).max(65535).parse(process.env.EXECUTOR_PORT?.trim()||'4001');
+mkdirSync(dirname(path),{recursive:true});
+const store=new Store(path);store.migrate();
+const server=createExecutorApi(new OperationLedger(new Gateway(store)),secret);
+server.listen(port,'127.0.0.1',()=>console.log('PROOFIT executor reservation service on loopback port '+port+'; provider writes disabled'));
+const shutdown=()=>server.close(()=>store.close());
+process.once('SIGINT',shutdown);process.once('SIGTERM',shutdown);

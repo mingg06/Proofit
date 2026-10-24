@@ -180,3 +180,5 @@ Cut animations, an optional second reviewer, broad ingestion, extra providers, c
 ## 24 October implementation evidence
 
 First Phase 2 milestone: rules-v1 named checks and persistent staff-scoped validations, structured policy/source/evidence schemas and a bounded read-only provider adapter boundary are implemented. Controlled fixtures demonstrate exact READY, BLOCK and review behavior; default API cannot treat fixtures as live. Reservation/provider execution remain pending. This does not close the Phase 2 exit gate or any live integration gate.
+
+Second Phase 2 milestone: authenticated isolated reservation service, fresh revalidation after persistent target lease acquisition, atomic operation/receipt/approval/audit transaction, permanent business/provider keys and scoped operation reads are implemented. Controlled concurrency, replay, rollback, fencing and two-worker/restart tests pass. Provider submission and uncertain-outcome reconciliation are not implemented; Phase 2 live-executor isolation and real vertical-slice gates remain unfinished.

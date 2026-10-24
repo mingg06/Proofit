@@ -22,7 +22,7 @@ export class Store {
   }
   migrate(): void {
     this.db.exec('CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, digest TEXT NOT NULL, applied_at TEXT NOT NULL) STRICT');
-    const migrations = ['001_foundation.sql', '002_gateway.sql'];
+    const migrations = ['001_foundation.sql', '002_gateway.sql', '003_resource_leases.sql'];
     this.transaction(() => {
       migrations.forEach((file, index) => {
         const version = index + 1;

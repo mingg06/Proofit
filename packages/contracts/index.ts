@@ -55,5 +55,5 @@ export const investigatorOutputSchema = z.strictObject({
 export const investigationLimits = Object.freeze({ toolCalls: 10, modelTurns: 4, activeDurationMs: 45000 });
 export const operationSchema = z.strictObject({ operationId: id, businessOperationKey: digest, providerIdempotencyKey: id,
   tenantId: id, customerId: id, requestId: id, requestVersion: z.number().int().positive(), receiptId: id,
-  validationId: id, resourceKey: id, action: actionSchema, state: operationStateSchema, providerObjectId: id.nullable(),
+  validationId: id, resourceKey: z.string().min(1).max(600), action: actionSchema, state: operationStateSchema, providerObjectId: id.nullable(),
   effectVerified: z.boolean(), createdAt: timestamp, updatedAt: timestamp });

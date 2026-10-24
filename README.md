@@ -2,7 +2,7 @@
 
 PROOFIT investigates proposed subscription actions and enforces exact authority before execution. [PROOFIT_FINAL_PLAN.md](PROOFIT_FINAL_PLAN.md) defines the product; [BUILD_PHASES.md](BUILD_PHASES.md) defines the gates.
 
-The initial persistent backend now supports real local password/session authentication, tenant/customer isolation, versioned requests, raw proposals, exact-action confirmations, fixed-role staff approvals and atomic audits. Shared schemas, four synthetic development examples and a draft evaluation manifest are also implemented. Resources/policy are visibly synthetic; no provider actions run. React, eve investigation, deterministic execution checks, live integrations and outcome reconciliation remain pending. No phase is declared complete.
+The initial persistent backend now supports real local password/session authentication, tenant/customer isolation, versioned requests, raw proposals, exact-action confirmations, fixed-role staff approvals and atomic audits. Shared schemas, four synthetic development examples and a draft evaluation manifest are also implemented. Resources/policy are visibly synthetic; no provider actions run. The deterministic rules-only gateway and authenticated isolated reservation service are now implemented. React, eve investigation, live integrations, provider submission and outcome reconciliation remain pending. No phase is declared complete.
 
 ## Run locally
 
@@ -50,7 +50,8 @@ Preflight currently exits 1 because sponsor/provider configuration is missing. I
 
 ## Source boundaries
 
-- apps/backend: local HTTP API, persistent authentication and authority service, SQLite store/configuration and synthetic seed.
+- apps/backend: local HTTP API, persistent authentication, rules-only gateway, authority/operation ledger, SQLite store/configuration and synthetic seed.
+- apps/executor: isolated service-authenticated reservation boundary; provider writes disabled.
 - migrations: versioned relational schema; migration integrity checked on startup.
 - packages/contracts: shared schemas, canonical binding and operation identity/transition definitions.
 - fixtures: synthetic action examples; no live inference or provider records.
@@ -59,6 +60,8 @@ Preflight currently exits 1 because sponsor/provider configuration is missing. I
 - evaluation/manifest.json: 12 development and 36 held-out authoring slots, not a frozen dataset.
 - evaluation/reviewer-only: provisional expectations; exclude from every model/tool-visible source.
 
-See [contract decisions](docs/CONTRACTS.md) and [integration access record](docs/INTEGRATION_ACCESS.md). Next on the critical path: deterministic checks and persistent operation reservation before any provider writes; live integrations retain their access gates.
+See [contract decisions](docs/CONTRACTS.md) and [integration access record](docs/INTEGRATION_ACCESS.md). Next on the critical path: approved live retrieval/provider-state access and the isolated test-provider submission/reconciliation path; live integrations retain their access gates.
 
-Deterministic validation is now implemented: see [gateway behavior and provenance](docs/GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation and provider execution are not enabled.
+Deterministic validation is now implemented: see [gateway behavior and provenance](docs/GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation is implemented behind the authenticated isolated service; provider execution remains disabled.
+
+The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](docs/OPERATIONS.md). Provider submission/reconciliation remain unimplemented.

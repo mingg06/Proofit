@@ -12,7 +12,7 @@ export async function harness(path = ':memory:') {
  let clock = new Date('2026-10-24T00:00:00.000Z'); const now = () => clock;
  const foundation = new Foundation(store, now);
  const tokens: Record<string,string> = {};
- for (const email of ['customer.a@proofit.test','approver.a@proofit.test','support.a@proofit.test','approver.other@proofit.test']) {
+ for (const email of ['customer.a@proofit.test','customer.b@proofit.test','approver.a@proofit.test','support.a@proofit.test','approver.other@proofit.test']) {
   const a = seed.credentials.find(c => c.email === email)!;
   tokens[email.split('@')[0]!] = (await foundation.auth.login({ email, password: a.password })).token;
  }

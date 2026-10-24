@@ -6,11 +6,11 @@ Status: implemented schemas and synthetic fixtures, awaiting team agreement. The
 
 - packages/contracts: single shared action, authority, investigation, and operation definitions; primary editor is the backend owner, with AI/evidence review.
 - Planned apps/console: React request/confirmation, investigation/review, execution/replay views. No trusted role, decision, or provider parameters from controls.
-- apps/backend (foundation implemented; gateway/execution pending): authenticated sessions, tenant/customer mapping, receipts, exact staff approvals, deterministic decisions, relational transactions, audits and scoped reads.
+- apps/backend (foundation, deterministic gateway and reservation ledger implemented; provider submission pending): authenticated sessions, tenant/customer mapping, receipts, exact staff approvals, deterministic decisions, relational transactions, audits and scoped reads.
 - Planned apps/investigator: bounded eve investigation, typed read-only evidence tools, NVIDIA inference, Zetaris retrieval, Meterless pointers. No provider execution credentials.
-- Planned apps/executor: authenticated service receiving only a stored validationId, resolving trusted records, revalidating live state, reserving and executing exact test-provider operations.
+- apps/executor (authenticated reservation boundary implemented; provider submission pending): authenticated service receiving only a stored validationId, resolving trusted records, revalidating live state, reserving and executing exact test-provider operations.
 
-Executable code exists in packages/contracts and apps/backend. The local backend implements password/session authentication, scoped requests/proposals, confirmations, exact staff approval and transactional audit persistence. See BACKEND.md. Console, investigator and executor remain planned.
+Executable code exists in packages/contracts and apps/backend. The local backend implements password/session authentication, scoped requests/proposals, confirmations, exact staff approval and transactional audit persistence. See BACKEND.md. Console and investigator remain planned. The isolated executor currently reserves by stored reference and cannot submit provider writes.
 
 ## Actions, identity, and authority
 
@@ -18,7 +18,7 @@ Actions are a strict discriminated union: end-of-period subscription cancellatio
 
 Public confirmation accepts only request/version/action. Public approval accepts a receipt reference. The authenticated server resolves identity, roles, ownership, policy and the stored exact action. Parsing authenticatedContextSchema or receiptSchema does not authenticate their contents. Receipts and approvals must be loaded from trusted persistence, never accepted as authority from a client or model.
 
-Parameter digests use a domain-tagged, explicitly ordered JSON tuple and SHA-256. They bind tenant, confirming actor, customer, request/version, policy and all action parameters. Hashes are identity checks, not signatures. Expiry and consumption are stored receipt fields. The foundation issues receipts and rejects expired/consumed authority for confirmation or approval. Actual atomic consumption/reservation at execution is still Phase 2 work.
+Parameter digests use a domain-tagged, explicitly ordered JSON tuple and SHA-256. They bind tenant, confirming actor, customer, request/version, policy and all action parameters. Hashes are identity checks, not signatures. Expiry and consumption are stored receipt fields. The foundation issues receipts and rejects expired/consumed authority for confirmation or approval. Atomic consumption/reservation is now implemented through OperationLedger; actual provider submission remains gated.
 
 Refunds always require customer confirmation, current business eligibility and an unexpired exact-action approval by a server-mapped REFUND_APPROVER. SUPPORT cannot grant approval. Staff approvals bind the stored confirmation digest and staff actor separately. Policy configuration must establish eligibility; the model cannot override it.
 
@@ -36,7 +36,7 @@ Legal ledger transitions are in packages/contracts/lifecycle.ts:
 
 Record SUBMITTED durably before invoking the provider. A crash then requires reconciliation even if the call may not have occurred. Never reset OUTCOME_UNKNOWN to RESERVED or create a fresh provider key to retry it. Future documented same-key retry logic needs an explicit reconciliation record and provider retention checks; this initial contract provides no resubmission permission.
 
-Business identity is tenant/customer/request/version, independent of proposal corrections, policy updates and retry IDs. One confirmed request version authorises at most one business operation. A new authorised action requires a new confirmation/request version and fresh authority. Resource identity is tenant plus target type/ID, so distinct requests for the same resource serialize. Generate and store one provider key on first reservation; persistent unique constraints, locking and single-use consumption are still Phase 2 work, not guarantees from these pure helpers.
+Business identity is tenant/customer/request/version, independent of proposal corrections, policy updates and retry IDs. One confirmed request version authorises at most one business operation. A new authorised action requires a new confirmation/request version and fresh authority. Resource identity is tenant plus target type/ID, so distinct requests for the same resource serialize. Generate and store one provider key on first reservation; the persistent ledger now adds unique constraints, locking and single-use consumption around these pure helpers. Provider submission/reconciliation remains unfinished.
 
 ## Investigation and evaluation
 

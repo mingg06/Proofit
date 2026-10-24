@@ -1,6 +1,6 @@
 # Persistent foundation API
 
-This local Phase 1 slice stores authenticated accounts/sessions, tenant/customer mappings, request versions, raw proposals, exact-action confirmations, staff approvals, synthetic policy/source metadata and audit events in SQLite. It has no investigator, deterministic execution gateway, provider writes or React UI. No phase exit gate is declared complete.
+This local Phase 1 slice stores authenticated accounts/sessions, tenant/customer mappings, request versions, raw proposals, exact-action confirmations, staff approvals, synthetic policy/source metadata and audit events in SQLite. It now also has a deterministic gateway and isolated reservation service (see GATEWAY.md and OPERATIONS.md). It has no investigator, provider submission or React UI. No phase exit gate is declared complete.
 
 ## Setup and commands
 
@@ -70,6 +70,8 @@ Every receipt and approval write is atomic with its audit event. Database unique
 
 Checks verified: TypeScript; HTTP authentication, Origin/CSRF, tenant/customer isolation, role forgery, target/amount substitution, stale versions, policy changes, expiry/consumption, concurrent confirmation/approval retries, rollback on audit failure, role revocation and session expiry; file-backed reopen preserving accounts/sessions/receipts/approvals/proposals/audit. Controlled database consumption/tampering fixtures are labelled in tests and are not provider observations.
 
-The local login limiter is process-local, not a distributed auth service. No public deployment is provided. Investigation/evidence/findings/operations/outcome storage and persistent provider recovery are still pending; do not infer those guarantees from the foundational SQLite tables.
+The local login limiter is process-local, not a distributed auth service. No public deployment is provided. Source/evidence schemas and operation reservation storage are now implemented. Live evidence ingestion, investigation/findings/outcome storage and persistent provider recovery are still pending; do not infer those guarantees from the foundational SQLite tables.
 
-Deterministic validation is now implemented: see [gateway behavior and provenance](GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation and provider execution are not enabled.
+Deterministic validation is now implemented: see [gateway behavior and provenance](GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation is implemented behind the authenticated isolated service; provider execution remains disabled.
+
+The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](OPERATIONS.md). Provider submission/reconciliation remain unimplemented.

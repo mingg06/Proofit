@@ -15,7 +15,8 @@
     "migrate": "node scripts/migrate.ts",
     "seed": "node scripts/seed.ts",
     "dev": "node --watch apps/backend/main.ts",
-    "start": "node apps/backend/main.ts"
+    "start": "node apps/backend/main.ts",
+    "start:executor": "node apps/executor/main.ts"
   },
   "dependencies": {
     "zod": "4.6.7"

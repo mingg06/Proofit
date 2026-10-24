@@ -1,5 +1,7 @@
+import { jsonBody, send } from './http-utils.ts';
+import { OperationLedger } from './operations.ts';
 import { Gateway } from './gateway.ts';
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer, type IncomingMessage } from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
 import { z, ZodError } from 'zod';
 import { Foundation } from './foundation.ts';
@@ -10,32 +12,10 @@ function cookieToken(req: IncomingMessage): string | undefined {
   if (values.length !== 1) return undefined;
   return values[0]?.slice('proofit_session='.length);
 }
-async function jsonBody(req: IncomingMessage): Promise<unknown> {
-  if (req.headers['content-type']?.split(';')[0]?.trim() !== 'application/json') throw new HttpError(415, 'JSON content type required');
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = []; let bytes = 0; let failed = false;
-    req.on('data', (chunk: Buffer) => {
-      bytes += chunk.length;
-      if (bytes > 65536) { failed = true; chunks.length = 0; reject(new HttpError(413, 'Request body too large')); }
-      if (!failed) chunks.push(chunk);
-    });
-    req.on('end', () => {
-      if (failed) return;
-      try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); }
-      catch { reject(new HttpError(400, 'Invalid JSON')); }
-    });
-    req.on('error', () => reject(new HttpError(400, 'Incomplete request')));
-    req.on('aborted', () => reject(new HttpError(400, 'Incomplete request')));
-  });
-}
-function send(res: ServerResponse, status: number, body: unknown): void {
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store',
-    'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'", 'Referrer-Policy': 'no-referrer' });
-  res.end(JSON.stringify(body));
-}
 const querySchema = z.strictObject({ version: z.coerce.number().int().positive().default(1) });
 export function createApi(foundation: Foundation, origin: string) {
   const gateway = new Gateway(foundation.store, { now: foundation.now });
+  const ledger = new OperationLedger(gateway);
   const secure = new URL(origin).protocol === 'https:';
   const cookie = (value: string, maxAge: number) => 'proofit_session=' + value + '; HttpOnly; SameSite=Strict; Path=/; Max-Age=' + maxAge + (secure ? '; Secure' : '');
   // Local development protection. Distributed/deployed auth needs a shared rate limiter.
@@ -74,6 +54,8 @@ export function createApi(foundation: Foundation, origin: string) {
       if (method === 'POST' && path === '/api/validations') return send(res, 201, await gateway.validate(token!, await jsonBody(req)));
       const validationMatch = /^\/api\/validations\/([^/]+)$/.exec(path);
       if (method === 'GET' && validationMatch?.[1]) return send(res, 200, gateway.getValidation(token!, decodeURIComponent(validationMatch[1])));
+      const operationMatch = /^\/api\/operations\/([^/]+)$/.exec(path);
+      if (method === 'GET' && operationMatch?.[1]) return send(res,200,ledger.get(token!,decodeURIComponent(operationMatch[1])));
       if (method === 'GET' && path === '/api/requests') return send(res, 200, foundation.listRequests(token!));
       if (method === 'POST' && path === '/api/requests') return send(res, 201, foundation.createRequest(token!, await jsonBody(req)));
       const match = /^\/api\/requests\/([^/]+)$/.exec(path);
