@@ -65,3 +65,5 @@ See [contract decisions](docs/CONTRACTS.md) and [integration access record](docs
 Deterministic validation is now implemented: see [gateway behavior and provenance](docs/GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation is implemented behind the authenticated isolated service; provider execution remains disabled.
 
 The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](docs/OPERATIONS.md). Provider submission/reconciliation remain unimplemented.
+
+A pinned Stripe cancellation adapter and read-only access probe are implemented but live submission remains unwired. See [cancellation integration](docs/CANCELLATION.md).

@@ -31,3 +31,5 @@ No credentials were printed or committed. Local random test-account credentials 
 Next access evidence required: exact NVIDIA model and measured schema-valid output; genuine Zetaris references from both sources; Meterless write/read then restart/read; read-only Stripe account test-mode verification. Keep Phase 0 live-access gate unfinished until recorded. Do not install an assumed eve/provider combination or enable provider writes to bypass this gate.
 
 Persistence verification: Node v24.22.1 DatabaseSync worked in memory and on disk with migrations, prepared statements and foreign-key transactions. The current official Node SQLite docs (https://nodejs.org/api/sqlite.html) describe a newer runtime; this build uses the installed Node 24 API, tested directly. Preserve the selected runtime pending deployment compatibility review.
+
+24 October: stripe 23.0.1 installed and typechecked on Node 24.22.1; pinned API 2026-09-30.endive matches installed SDK. Narrow cancellation adapter tested with CONTROLLED_TEST transport. Read-only stripe:probe returned NOT_TESTED/missing STRIPE_TEST_SECRET_KEY, making no live calls. See CANCELLATION.md.
