@@ -5,7 +5,7 @@ import { businessOperationKey, resourceKey } from '../../packages/contracts/iden
 import { Auth, HttpError, type Actor } from './auth.ts';
 import { Store } from './database.ts';
 import { evaluate, type Snapshot } from './rules.ts';
-export const rulesVersion='rules-v2' as const;
+export const rulesVersion='rules-v3' as const;
 export function parsedJson(value: string | undefined | null): unknown { try { return value ? JSON.parse(value) : null; } catch { return null; } }
 export type ProposalRow = { id: string; tenant_id: string; request_id: string; request_version: number; proposal_json: string };
 export type ValidationRow = { id: string; tenant_id: string; actor_id: string; proposal_id: string; receipt_id: string | null; decision: string; record_json: string; mode: GatewayMode; rules_version: string };
@@ -52,7 +52,10 @@ export class Gateway {
    action.data.type === 'REFUND_PAYMENT' ? action.data.paymentId : action.data.subscriptionId, action.data.type === 'REFUND_PAYMENT' ? 'PAYMENT' : 'SUBSCRIPTION') : null;
   const duplicate=confirmed.success?this.store.get<{id:string}>('SELECT id FROM operations WHERE business_key=?',businessOperationKey(confirmed.data.binding)):undefined;
   const busy=confirmed.success?this.store.get<{id:string}>("SELECT id FROM operations WHERE resource_key=? AND state IN('RESERVED','SUBMITTED','PENDING','OUTCOME_UNKNOWN')",resourceKey(confirmed.data.binding)):undefined;
-  return { actor, request, latestVersion: this.store.get<{ version: number }>('SELECT MAX(version) AS version FROM requests WHERE tenant_id=? AND id=?', actor.tenant_id, request.id)!.version,
+  const investigation=this.store.get<{status:string;unresolved_json:string}>('SELECT status,unresolved_json FROM investigations WHERE tenant_id=? AND proposal_id=? ORDER BY sequence DESC LIMIT 1',actor.tenant_id,proposalId);
+  const unresolved=parsedJson(investigation?.unresolved_json);
+  const investigationHold=!!investigation&&(!['COMPLETE','RULES_ONLY'].includes(investigation.status)||!Array.isArray(unresolved)||unresolved.length>0);
+  return { actor, request, investigationHold, latestVersion: this.store.get<{ version: number }>('SELECT MAX(version) AS version FROM requests WHERE tenant_id=? AND id=?', actor.tenant_id, request.id)!.version,
    proposal: parsedJson(proposal.proposal_json), receipt, approval,
    confirmingActor: this.store.get<NonNullable<Snapshot['confirmingActor']>>('SELECT * FROM actors WHERE tenant_id=? AND id=?', actor.tenant_id, request.actor_id) ?? null,
    approvingActor: approvalRow ? this.store.get<NonNullable<Snapshot['approvingActor']>>('SELECT * FROM actors WHERE tenant_id=? AND id=?', actor.tenant_id, approvalRow.actor_id) ?? null : null,

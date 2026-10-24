@@ -196,7 +196,7 @@ test('authenticated HTTP foundation enforces exact authority and isolation', asy
     assert.equal((await call('/api/validations','POST',body,customer)).status,403);
     assert.equal((await call('/api/validations','POST',body,otherApprover)).status,404);
     const v = await call('/api/validations','POST',body,support);
-    assert.equal(v.status,201); assert.equal(v.data.decision,'REVIEW_REQUIRED'); assert.equal(v.data.rulesVersion,'rules-v2');
+    assert.equal(v.status,201); assert.equal(v.data.decision,'REVIEW_REQUIRED'); assert.equal(v.data.rulesVersion,'rules-v3');
     assert.equal((await call('/api/validations/'+v.data.validationId,'GET',undefined,support)).status,200);
     assert.equal((await call('/api/validations/'+v.data.validationId,'GET',undefined,otherApprover)).status,404);
     assert.equal((await call('/api/validations/'+v.data.validationId,'GET',undefined,customer)).status,403);

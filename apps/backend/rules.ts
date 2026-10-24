@@ -11,6 +11,7 @@ export type Snapshot = {
  resource: { customer_id: string; provenance: string } | null;
  policy: { version: string; source_version: string; provenance: string } | null; rules: unknown;
  manifest: { policy_version: string; content: unknown; evidence: { purpose: string; record: unknown; excerpt: string | null; approved: number; provenance: string | null }[] } | null;
+ investigationHold?:boolean;
  duplicate: boolean; busyResource: boolean; duplicateOperationId:string|null; busyResourceOperationId:string|null;
 };
 export function evaluate(snapshot: Snapshot, stateInput: unknown, now: Date, mode: GatewayMode, forOperationId?:string) {
@@ -83,6 +84,7 @@ export function evaluate(snapshot: Snapshot, stateInput: unknown, now: Date, mod
  const duplicate=s.duplicate&&s.duplicateOperationId!==forOperationId;
  const busy=s.busyResource&&s.busyResourceOperationId!==forOperationId;
  add('operation_identity', duplicate ? 'BLOCK' : busy ? 'REVIEW_REQUIRED' : 'PASS', duplicate ? 'A business operation already exists; retrieve/reconcile it.' : busy ? 'Another operation holds this target; reconcile it first.' : 'No prior business operation or active target reservation.');
+ add('investigation_completion',s.investigationHold?'REVIEW_REQUIRED':'PASS',s.investigationHold?'The latest investigation is incomplete or has unresolved issues; review is required.':'No unresolved investigation hold.');
  const state = providerStateSchema.safeParse(stateInput);
  if (!state.success || !binding || !action.success) add('provider_state', 'REVIEW_REQUIRED', 'Fresh typed provider state is unavailable.');
  else {

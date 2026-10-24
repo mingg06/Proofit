@@ -21,7 +21,7 @@ export class OperationLedger {
   const row=g.store.get<ValidationRow>('SELECT * FROM validations WHERE id=?',validationId);
   if(!row)throw new HttpError(404,'Validation not found');
   const record=validationSchema.parse(parsedJson(row.record_json));
-  if(row.decision!=='READY'||record.decision!=='READY'||row.mode!==g.mode||row.rules_version!==rulesVersion||record.validationId!==row.id||record.proposalId!==row.proposal_id)throw new HttpError(409,'Stored validation is not eligible in this executor mode');
+  if(row.decision!=='READY'||record.decision!=='READY'||row.mode!==g.mode||record.validationId!==row.id||record.proposalId!==row.proposal_id)throw new HttpError(409,'Stored validation is not eligible in this executor mode');
   const actor=g.store.get<Actor & {active:number}>('SELECT * FROM actors WHERE tenant_id=? AND id=?',row.tenant_id,row.actor_id);
   if(!actor?.active)throw new HttpError(403,'Initiating staff authority is no longer active');
   g.staff(actor);
@@ -44,6 +44,7 @@ export class OperationLedger {
    const context=this.reference(validationId);
    const existing=this.existing(context.binding,context.record.bindingDigest,context.record.receiptId);
    if(existing)return {existing};
+   if(context.row.rules_version!==rulesVersion)throw new HttpError(409,'Fresh validation required for the current rules version');
    const before=evaluate(context.snapshot,null,g.now(),g.mode);
    if(!before.checks.every(c=>c.name==='provider_state'||c.result==='PASS'))return {held:g.persist(context.actor,context.row.proposal_id,context.snapshot,null)};
    const key=resourceKey(context.binding);const leaseId=randomUUID();const now=g.now().toISOString();
@@ -60,6 +61,7 @@ export class OperationLedger {
     const context=this.reference(validationId);
     const existing=this.existing(context.binding,context.record.bindingDigest,context.record.receiptId);
     if(existing)return {operation:existing};
+    if(context.row.rules_version!==rulesVersion)throw new HttpError(409,'Fresh validation required for the current rules version');
     const lease=g.store.get('SELECT lease_id FROM resource_leases WHERE resource_key=? AND lease_id=? AND expires_at>?',initial.key!,initial.leaseId!,g.now().toISOString());
     const validation=g.persist(context.actor,context.row.proposal_id,lease?context.snapshot:{...context.snapshot,busyResource:true},state);
     if(validation.decision!=='READY')return {held:validation};

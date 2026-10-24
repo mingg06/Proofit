@@ -156,6 +156,7 @@ export class Foundation {
       const base = { request, receipt: row ? receiptRecord(row) : null, executionEnabled: false };
       if (actor.role === 'CUSTOMER') return base;
       return { ...base,
+        investigations: this.store.all('SELECT id,status,mode,model_id,created_at,validation_id FROM investigations WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY sequence',actor.tenant_id,requestId,version),
         proposals: this.store.all('SELECT id,proposal_json,conversation,created_at FROM proposals WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY created_at,id', actor.tenant_id, requestId, version),
         approvals: row ? this.store.all<ApprovalRow>('SELECT * FROM approvals WHERE tenant_id=? AND receipt_id=?', actor.tenant_id, row.id).map(approvalRecord) : [],
         auditEvents: this.store.all('SELECT sequence,id,actor_id,event,detail_json,created_at FROM audit_events WHERE tenant_id=? AND request_id=? AND request_version=? ORDER BY sequence', actor.tenant_id, requestId, version),

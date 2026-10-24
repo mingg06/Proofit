@@ -1,3 +1,4 @@
+import { Investigator } from '../investigator/runner.ts';
 import { jsonBody, send } from './http-utils.ts';
 import { OperationLedger } from './operations.ts';
 import { Gateway } from './gateway.ts';
@@ -15,6 +16,7 @@ function cookieToken(req: IncomingMessage): string | undefined {
 const querySchema = z.strictObject({ version: z.coerce.number().int().positive().default(1) });
 export function createApi(foundation: Foundation, origin: string) {
   const gateway = new Gateway(foundation.store, { now: foundation.now });
+  const investigator = new Investigator(gateway);
   const ledger = new OperationLedger(gateway);
   const secure = new URL(origin).protocol === 'https:';
   const cookie = (value: string, maxAge: number) => 'proofit_session=' + value + '; HttpOnly; SameSite=Strict; Path=/; Max-Age=' + maxAge + (secure ? '; Secure' : '');
@@ -51,6 +53,9 @@ export function createApi(foundation: Foundation, origin: string) {
       if (method === 'POST' && path === '/api/logout') {
         foundation.auth.logout(token!); res.setHeader('Set-Cookie', cookie('', 0)); return send(res, 200, { loggedOut: true });
       }
+      if (method === 'POST' && path === '/api/investigations') return send(res,201,await investigator.start(token!,await jsonBody(req)));
+      const investigationMatch=/^\/api\/investigations\/([^/]+)$/.exec(path);
+      if(method==='GET'&&investigationMatch?.[1]) return send(res,200,investigator.get(token!,decodeURIComponent(investigationMatch[1])));
       if (method === 'POST' && path === '/api/validations') return send(res, 201, await gateway.validate(token!, await jsonBody(req)));
       const validationMatch = /^\/api\/validations\/([^/]+)$/.exec(path);
       if (method === 'GET' && validationMatch?.[1]) return send(res, 200, gateway.getValidation(token!, decodeURIComponent(validationMatch[1])));

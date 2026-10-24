@@ -77,3 +77,5 @@ Deterministic validation is now implemented: see [gateway behavior and provenanc
 The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](OPERATIONS.md). Provider submission/reconciliation remain unimplemented.
 
 Cancellation outcomes: operation reads now render structured status through outcome-status.ts, requiring a matching provider observation for effect verification. The cancellation executor and durable observer are implemented/tested under controlled provenance (68 tests); no live worker/provider path is enabled. See CANCELLATION.md.
+
+Staff investigation endpoints: POST /api/investigations with {proposalId} starts a new bounded run; GET /api/investigations/:id is recorded replay only. The default model is unconfigured and returns an explicit UNAVAILABLE review hold. See INVESTIGATION.md for budgets, tools, provenance and integration limits.

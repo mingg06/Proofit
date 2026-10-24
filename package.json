@@ -17,7 +17,8 @@
     "dev": "node --watch apps/backend/main.ts",
     "start": "node apps/backend/main.ts",
     "start:executor": "node apps/executor/main.ts",
-    "stripe:probe": "node scripts/stripe-probe.ts"
+    "stripe:probe": "node scripts/stripe-probe.ts",
+    "nvidia:probe": "node scripts/nvidia-probe.ts"
   },
   "dependencies": {
     "stripe": "23.0.1",
