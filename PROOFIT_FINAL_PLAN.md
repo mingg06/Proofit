@@ -1,9 +1,8 @@
 # PROOFIT — Verify the Action Before It Happens
 
 **Tagline:** You proof it. You profit.  
-**Version:** 3.2 · 24 October 2026  
 **Project type:** Standalone Web2 application, built independently  
-**Recommended track:** Track 3 — Reasoning Architecture  
+**Track:** Track 3 — Reasoning Architecture  
 **Status:** Proposal and implementation plan; no implementation or evaluation results claimed
 
 > PROOFIT investigates an AI-proposed financial action, checks it against the confirmed request, authoritative records, and approved business policy, and controls whether its executor may perform that exact action. It then verifies and accurately reports the recorded outcome.
