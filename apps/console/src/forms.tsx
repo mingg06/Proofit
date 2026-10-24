@@ -80,8 +80,40 @@ export function ActionForm({
         <legend className="sr-only">Exact action parameters</legend>
         <div className="field">
           <label htmlFor={id + "type"}>Action</label>
+          <div className="choice-grid">
+            <button
+              type="button"
+              className={
+                "choice-card" +
+                (kind === "CANCEL_AT_PERIOD_END" ? " selected" : "")
+              }
+              onClick={() => {
+                setKind("CANCEL_AT_PERIOD_END");
+                setTarget("");
+                setError(null);
+              }}
+            >
+              <strong>Cancel next renewal</strong>
+              <span>Keep access until the paid period ends.</span>
+            </button>
+            <button
+              type="button"
+              className={
+                "choice-card" + (kind === "REFUND_PAYMENT" ? " selected" : "")
+              }
+              onClick={() => {
+                setKind("REFUND_PAYMENT");
+                setTarget("");
+                setError(null);
+              }}
+            >
+              <strong>Refund a payment</strong>
+              <span>Exact amount in MYR, then staff approval.</span>
+            </button>
+          </div>
           <select
             id={id + "type"}
+            className="action-select"
             value={kind}
             onChange={(e) => {
               setKind(e.target.value as typeof kind);

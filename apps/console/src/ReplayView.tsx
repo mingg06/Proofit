@@ -84,17 +84,21 @@ export function ReplayView({ data, actor }: { data: Case; actor: Actor }) {
   }, [runId, actor.role, retry]);
   const unresolved = replay ? json(replay.run.unresolved_json) : null;
   return (
-    <div className="stack large-gap">
-      <section className="panel">
+    <div className={"stack large-gap replay-layout" + (actor.role === "CUSTOMER" ? " customer-replay" : "")}>
+      <header className="replay-page-header">
+        <div>
+          <p className="eyebrow">RECORDED OUTCOME</p>
+          <h2>Execution replay</h2>
+          <p>An immutable view of what the connected system recorded.</p>
+        </div>
+        <Badge value="RECORDED">Read-only replay</Badge>
+      </header>
+      <section className="panel replay-outcome">
         <div className="panel-heading">
           <div>
             <p className="eyebrow">03 / EXECUTION & OBSERVATION</p>
             <h2>The recorded outcome</h2>
           </div>
-          <Badge value="DISABLED">
-            <Icon name="lock" size={12} />
-            Execution disabled
-          </Badge>
         </div>
         {data.operations.length > 0 && (
           <div className="field">
@@ -190,18 +194,9 @@ export function ReplayView({ data, actor }: { data: Case; actor: Actor }) {
             Eligibility, submission and verified effect are separate steps.
           </Empty>
         )}
-        <div className="disabled-action">
-          <span className="small muted">
-            Provider submission is unavailable in this workspace.
-          </span>
-          <button className="button secondary" disabled>
-            Submit action
-            <Icon name="lock" size={16} />
-          </button>
-        </div>
       </section>
       {actor.role !== "CUSTOMER" && (
-        <section className="panel">
+        <section className="panel replay-investigation">
           <div className="panel-heading">
             <div>
               <p className="eyebrow">RECORDED INVESTIGATION</p>
@@ -363,13 +358,11 @@ export function ReplayView({ data, actor }: { data: Case; actor: Actor }) {
           )}
         </section>
       )}
-      <section className="panel">
+      <section className="panel replay-audit">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">
-              {actor.role === "CUSTOMER" ? "YOUR RECORDS" : "AUDIT TRAIL"}
-            </p>
-            <h2>A traceable history</h2>
+            <p className="eyebrow">RECORDED HISTORY</p>
+            <h2>{actor.role === "CUSTOMER" ? "Your request history" : "Audit events"}</h2>
           </div>
           <Icon name="replay" />
         </div>
@@ -420,6 +413,13 @@ export function ReplayView({ data, actor }: { data: Case; actor: Actor }) {
           Times shown in Malaysia time (UTC+8).
         </p>
       </section>
+      <aside className="replay-truth">
+        <Icon name="lock" size={17} />
+        <div>
+          <strong>Truthful by construction</strong>
+          <p>Status text is derived from stored records and observations. This view makes no claim about an unobserved provider effect.</p>
+        </div>
+      </aside>
     </div>
   );
 }
