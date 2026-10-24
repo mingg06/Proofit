@@ -2,7 +2,7 @@
 
 PROOFIT investigates proposed subscription actions and enforces exact authority before execution. [PROOFIT_FINAL_PLAN.md](PROOFIT_FINAL_PLAN.md) defines the product; [BUILD_PHASES.md](BUILD_PHASES.md) defines the gates.
 
-The initial persistent backend now supports real local password/session authentication, tenant/customer isolation, versioned requests, raw proposals, exact-action confirmations, fixed-role staff approvals and atomic audits. Shared schemas, four synthetic development examples and a draft evaluation manifest are also implemented. Resources/policy are visibly synthetic; no provider actions run. The deterministic rules-only gateway and authenticated isolated reservation service are now implemented. React, eve investigation, live integrations, provider submission and outcome reconciliation remain pending. No phase is declared complete.
+The initial persistent backend now supports real local password/session authentication, tenant/customer isolation, versioned requests, raw proposals, exact-action confirmations, fixed-role staff approvals and atomic audits. Shared schemas, four synthetic development examples and a draft evaluation manifest are also implemented. Resources/policy are visibly synthetic; no provider actions run. The deterministic rules-only gateway and authenticated isolated reservation service are now implemented. Cancellation submission and durable observation/reconciliation are implemented and tested with controlled providers. React, eve investigation, refund submission and all real integration gates remain pending. No phase is declared complete.
 
 ## Run locally
 
@@ -51,7 +51,7 @@ Preflight currently exits 1 because sponsor/provider configuration is missing. I
 ## Source boundaries
 
 - apps/backend: local HTTP API, persistent authentication, rules-only gateway, authority/operation ledger, SQLite store/configuration and synthetic seed.
-- apps/executor: isolated service-authenticated reservation boundary; provider writes disabled.
+- apps/executor: isolated service-authenticated reservation boundary; live provider writes disabled.
 - migrations: versioned relational schema; migration integrity checked on startup.
 - packages/contracts: shared schemas, canonical binding and operation identity/transition definitions.
 - fixtures: synthetic action examples; no live inference or provider records.
@@ -67,3 +67,5 @@ Deterministic validation is now implemented: see [gateway behavior and provenanc
 The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](docs/OPERATIONS.md). Provider submission/reconciliation remain unimplemented.
 
 A pinned Stripe cancellation adapter and read-only access probe are implemented but live submission remains unwired. See [cancellation integration](docs/CANCELLATION.md).
+
+Cancellation execution/recovery milestone: durable one-attempt submission, observation-backed scheduling status and restart-safe read-only reconciliation are implemented. All 68 tests and TypeScript pass. Default runtime still has no live cancellation route; no genuine provider action is claimed. See [cancellation execution details](docs/CANCELLATION.md).

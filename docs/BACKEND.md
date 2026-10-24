@@ -75,3 +75,5 @@ The local login limiter is process-local, not a distributed auth service. No pub
 Deterministic validation is now implemented: see [gateway behavior and provenance](GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation is implemented behind the authenticated isolated service; provider execution remains disabled.
 
 The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](OPERATIONS.md). Provider submission/reconciliation remain unimplemented.
+
+Cancellation outcomes: operation reads now render structured status through outcome-status.ts, requiring a matching provider observation for effect verification. The cancellation executor and durable observer are implemented/tested under controlled provenance (68 tests); no live worker/provider path is enabled. See CANCELLATION.md.

@@ -1,7 +1,8 @@
+import { outcomeStatus } from './outcome-status.ts';
 import { randomUUID } from 'node:crypto';
 import { executionInputSchema, operationSchema, validationSchema, type Binding } from '../../packages/contracts/index.ts';
 import { businessOperationKey, parameterDigest, resourceKey } from '../../packages/contracts/identity.ts';
-import { Gateway, parsedJson, type ValidationRow } from './gateway.ts';
+import { Gateway, parsedJson, rulesVersion, type ValidationRow } from './gateway.ts';
 import { evaluate } from './rules.ts';
 import { HttpError, type Actor } from './auth.ts';
 export type OperationRow = { id:string;tenant_id:string;customer_id:string;request_id:string;request_version:number;validation_id:string;receipt_id:string;
@@ -20,7 +21,7 @@ export class OperationLedger {
   const row=g.store.get<ValidationRow>('SELECT * FROM validations WHERE id=?',validationId);
   if(!row)throw new HttpError(404,'Validation not found');
   const record=validationSchema.parse(parsedJson(row.record_json));
-  if(row.decision!=='READY'||record.decision!=='READY'||row.mode!==g.mode||row.rules_version!=='rules-v1'||record.validationId!==row.id||record.proposalId!==row.proposal_id)throw new HttpError(409,'Stored validation is not eligible in this executor mode');
+  if(row.decision!=='READY'||record.decision!=='READY'||row.mode!==g.mode||row.rules_version!==rulesVersion||record.validationId!==row.id||record.proposalId!==row.proposal_id)throw new HttpError(409,'Stored validation is not eligible in this executor mode');
   const actor=g.store.get<Actor & {active:number}>('SELECT * FROM actors WHERE tenant_id=? AND id=?',row.tenant_id,row.actor_id);
   if(!actor?.active)throw new HttpError(403,'Initiating staff authority is no longer active');
   g.staff(actor);
@@ -97,10 +98,9 @@ export class OperationLedger {
   const row=this.gateway.store.get<OperationRow>('SELECT * FROM operations WHERE tenant_id=? AND id=?',actor.tenant_id,operationId);
   if(!row||(actor.role==='CUSTOMER'&&row.customer_id!==actor.customer_id))throw new HttpError(404,'Operation not found');
   const record=operationRecord(row);
-  const messages={RESERVED:'The action is reserved. No provider outcome has been observed.',SUBMITTED:'The action was submitted. Provider verification is pending.',PENDING:'The provider outcome is pending.',
-   OUTCOME_UNKNOWN:'We are checking the request status.',SUCCEEDED:'An operation success is recorded; consult the provider observation for its verified effect.',FAILED:'The operation is recorded as failed.',CANCELED:'The operation is recorded as canceled.'};
-  const base={operationId:record.operationId,requestId:record.requestId,requestVersion:record.requestVersion,state:record.state,mode:row.mode,effectVerified:record.effectVerified,
-   providerObjectId:record.providerObjectId,statusText:messages[record.state],executionEnabled:false};
+  const outcome=outcomeStatus(this.gateway.store,row);
+  const base={operationId:record.operationId,requestId:record.requestId,requestVersion:record.requestVersion,state:record.state,mode:row.mode,effectVerified:outcome.effectVerified,
+   providerObjectId:record.providerObjectId,statusText:outcome.statusText,observation:outcome.observation,executionEnabled:false};
   return actor.role==='CUSTOMER'?base:{...base,record};
  }
 }

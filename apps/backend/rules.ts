@@ -11,9 +11,9 @@ export type Snapshot = {
  resource: { customer_id: string; provenance: string } | null;
  policy: { version: string; source_version: string; provenance: string } | null; rules: unknown;
  manifest: { policy_version: string; content: unknown; evidence: { purpose: string; record: unknown; excerpt: string | null; approved: number; provenance: string | null }[] } | null;
- duplicate: boolean; busyResource: boolean;
+ duplicate: boolean; busyResource: boolean; duplicateOperationId:string|null; busyResourceOperationId:string|null;
 };
-export function evaluate(snapshot: Snapshot, stateInput: unknown, now: Date, mode: GatewayMode) {
+export function evaluate(snapshot: Snapshot, stateInput: unknown, now: Date, mode: GatewayMode, forOperationId?:string) {
  const s = snapshot; const checks: Check[] = [];
  function add(name: string, result: Check['result'], reason: string, evidenceIds: string[] = []) { checks.push({ name, result, reason, evidenceIds }); }
  const receipt = receiptSchema.safeParse(s.receipt); const action = actionSchema.safeParse(s.proposal);
@@ -30,9 +30,9 @@ export function evaluate(snapshot: Snapshot, stateInput: unknown, now: Date, mod
   || binding.requestId !== s.request.id || binding.requestVersion !== s.request.version || !s.confirmingActor?.active
   || s.confirmingActor.role !== 'CUSTOMER' || s.confirmingActor.tenant_id !== binding.tenantId || s.confirmingActor.customer_id !== binding.customerId) {
   add('receipt_integrity', 'BLOCK', 'Confirmation identity, ownership or request binding mismatch.');
- } else if (Date.parse(authority.createdAt) > currentTime || Date.parse(authority.expiresAt) <= currentTime || authority.consumedByOperationId !== null) {
+ } else if (Date.parse(authority.createdAt) > currentTime || Date.parse(authority.expiresAt) <= currentTime || authority.consumedByOperationId !== null && authority.consumedByOperationId !== forOperationId) {
   add('receipt_integrity', 'BLOCK', 'Receipt is expired, not yet valid or already consumed.');
- } else add('receipt_integrity', 'PASS', 'Authentic stored scope, digest, expiry and unused state match.');
+ } else add('receipt_integrity', 'PASS', forOperationId ? 'Stored scope, digest and expiry match the authority consumed by this operation.' : 'Authentic stored scope, digest, expiry and unused state match.');
  if (!binding || !action.success) add('exact_parameters', 'REVIEW_REQUIRED', 'Exact supported proposal and confirmation are required.');
  else {
   const match = parameterDigest({ ...binding, action: action.data }) === authority!.parameterDigest;
@@ -54,7 +54,7 @@ export function evaluate(snapshot: Snapshot, stateInput: unknown, now: Date, mod
  else if (!approval.success || !authority || approval.data.tenantId !== s.request.tenant_id || approval.data.receiptId !== authority.receiptId
   || approval.data.bindingDigest !== authority.parameterDigest || !s.approvingActor?.active || s.approvingActor.role !== 'REFUND_APPROVER'
   || s.approvingActor.tenant_id !== s.request.tenant_id || approval.data.approverActorId !== s.approvingActor.id
-  || approval.data.consumedByOperationId !== null || Date.parse(approval.data.createdAt) > currentTime
+  || (approval.data.consumedByOperationId !== null && approval.data.consumedByOperationId !== forOperationId) || Date.parse(approval.data.createdAt) > currentTime
   || Date.parse(approval.data.expiresAt) <= currentTime || Date.parse(approval.data.expiresAt) > Date.parse(authority.expiresAt)) {
   add('staff_approval', 'BLOCK', 'Approval scope, exact digest, current role, expiry or consumption mismatch.');
  } else add('staff_approval', 'PASS', 'Current exact-action staff approval is valid.');
@@ -80,7 +80,9 @@ export function evaluate(snapshot: Snapshot, stateInput: unknown, now: Date, mod
  }
  add('required_evidence', evidenceValid ? 'PASS' : 'REVIEW_REQUIRED', evidenceValid ? 'Approved resolvable request and policy passages match; no unresolved conflicts.' : 'Missing, stale, unapproved, conflicting or unresolvable evidence requires review.', evidenceIds);
  add('provenance', provenanceValid ? 'PASS' : 'REVIEW_REQUIRED', provenanceValid ? 'Sources match the trusted gateway mode.' : 'Synthetic/imported sources cannot establish live execution eligibility.');
- add('operation_identity', s.duplicate ? 'BLOCK' : s.busyResource ? 'REVIEW_REQUIRED' : 'PASS', s.duplicate ? 'A business operation already exists; retrieve/reconcile it.' : s.busyResource ? 'Another operation holds this target; reconcile it first.' : 'No prior business operation or active target reservation.');
+ const duplicate=s.duplicate&&s.duplicateOperationId!==forOperationId;
+ const busy=s.busyResource&&s.busyResourceOperationId!==forOperationId;
+ add('operation_identity', duplicate ? 'BLOCK' : busy ? 'REVIEW_REQUIRED' : 'PASS', duplicate ? 'A business operation already exists; retrieve/reconcile it.' : busy ? 'Another operation holds this target; reconcile it first.' : 'No prior business operation or active target reservation.');
  const state = providerStateSchema.safeParse(stateInput);
  if (!state.success || !binding || !action.success) add('provider_state', 'REVIEW_REQUIRED', 'Fresh typed provider state is unavailable.');
  else {

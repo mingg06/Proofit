@@ -5,6 +5,7 @@ import { businessOperationKey, resourceKey } from '../../packages/contracts/iden
 import { Auth, HttpError, type Actor } from './auth.ts';
 import { Store } from './database.ts';
 import { evaluate, type Snapshot } from './rules.ts';
+export const rulesVersion='rules-v2' as const;
 export function parsedJson(value: string | undefined | null): unknown { try { return value ? JSON.parse(value) : null; } catch { return null; } }
 export type ProposalRow = { id: string; tenant_id: string; request_id: string; request_version: number; proposal_json: string };
 export type ValidationRow = { id: string; tenant_id: string; actor_id: string; proposal_id: string; receipt_id: string | null; decision: string; record_json: string; mode: GatewayMode; rules_version: string };
@@ -49,14 +50,15 @@ export class Gateway {
   const action = actionSchema.safeParse(parsedJson(proposal.proposal_json));
   const resource = action.success ? this.store.get<NonNullable<Snapshot['resource']>>('SELECT * FROM resources WHERE tenant_id=? AND id=? AND kind=?', actor.tenant_id,
    action.data.type === 'REFUND_PAYMENT' ? action.data.paymentId : action.data.subscriptionId, action.data.type === 'REFUND_PAYMENT' ? 'PAYMENT' : 'SUBSCRIPTION') : null;
+  const duplicate=confirmed.success?this.store.get<{id:string}>('SELECT id FROM operations WHERE business_key=?',businessOperationKey(confirmed.data.binding)):undefined;
+  const busy=confirmed.success?this.store.get<{id:string}>("SELECT id FROM operations WHERE resource_key=? AND state IN('RESERVED','SUBMITTED','PENDING','OUTCOME_UNKNOWN')",resourceKey(confirmed.data.binding)):undefined;
   return { actor, request, latestVersion: this.store.get<{ version: number }>('SELECT MAX(version) AS version FROM requests WHERE tenant_id=? AND id=?', actor.tenant_id, request.id)!.version,
    proposal: parsedJson(proposal.proposal_json), receipt, approval,
    confirmingActor: this.store.get<NonNullable<Snapshot['confirmingActor']>>('SELECT * FROM actors WHERE tenant_id=? AND id=?', actor.tenant_id, request.actor_id) ?? null,
    approvingActor: approvalRow ? this.store.get<NonNullable<Snapshot['approvingActor']>>('SELECT * FROM actors WHERE tenant_id=? AND id=?', actor.tenant_id, approvalRow.actor_id) ?? null : null,
    resource: resource ?? null, policy, rules: parsedJson(rules?.rules_json),
    manifest: manifestRow ? { policy_version: manifestRow.policy_version, content: parsedJson(manifestRow.manifest_json), evidence } : null,
-   duplicate: confirmed.success && !!this.store.get('SELECT id FROM operations WHERE business_key=?', businessOperationKey(confirmed.data.binding)),
-   busyResource: confirmed.success && !!this.store.get("SELECT id FROM operations WHERE resource_key=? AND state IN('RESERVED','SUBMITTED','PENDING','OUTCOME_UNKNOWN')", resourceKey(confirmed.data.binding)),
+   duplicate:!!duplicate,busyResource:!!busy,duplicateOperationId:duplicate?.id??null,busyResourceOperationId:busy?.id??null,
   };
  }
  async observe(snapshot: Snapshot): Promise<unknown> {
@@ -72,16 +74,16 @@ export class Gateway {
   } catch { return null; }
   finally { if (timer) clearTimeout(timer); }
  }
- persist(actor: Actor, proposalId: string, snapshot: Snapshot, state: unknown) {
-  const result = evaluate(snapshot, state, this.now(), this.mode);
+ persist(actor: Actor, proposalId: string, snapshot: Snapshot, state: unknown, forOperationId?:string) {
+  const result = evaluate(snapshot, state, this.now(), this.mode, forOperationId);
   const record = validationSchema.parse({ validationId: randomUUID(), proposalId, receiptId: result.receipt?.receiptId ?? null,
    bindingDigest: result.receipt?.parameterDigest ?? null, decision: result.decision, checks: result.checks, createdAt: this.now().toISOString() });
   this.store.run('INSERT INTO validations VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)', record.validationId, actor.tenant_id, snapshot.request.customer_id,
-   snapshot.request.id, snapshot.request.version, proposalId, record.receiptId, actor.id, record.decision, JSON.stringify(record), state ? JSON.stringify(state) : null, this.mode, 'rules-v1', record.createdAt);
+   snapshot.request.id, snapshot.request.version, proposalId, record.receiptId, actor.id, record.decision, JSON.stringify(record), state ? JSON.stringify(state) : null, this.mode, rulesVersion, record.createdAt);
   for (const check of record.checks) this.store.run('INSERT INTO validation_checks VALUES(?,?,?,?,?)', record.validationId, check.name, check.result, check.reason, JSON.stringify(check.evidenceIds));
   this.store.run('INSERT INTO audit_events(id,tenant_id,request_id,request_version,actor_id,event,detail_json,created_at) VALUES(?,?,?,?,?,?,?,?)',
    randomUUID(), actor.tenant_id, snapshot.request.id, snapshot.request.version, actor.id, 'PROPOSAL_VALIDATED', JSON.stringify({ validationId: record.validationId, decision: record.decision, mode: this.mode }), record.createdAt);
-  return { ...record, mode: this.mode, rulesVersion: 'rules-v1', executionEnabled: false };
+  return { ...record, mode: this.mode, rulesVersion: rulesVersion, executionEnabled: false };
  }
  async validate(token: string, input: unknown) {
   const { proposalId } = validateInputSchema.parse(input);

@@ -1,4 +1,4 @@
-# Deterministic gateway — rules-v1
+# Deterministic gateway — rules-v2
 
 Implemented 24 October 2026. POST /api/validations accepts only {proposalId}; GET /api/validations/:id retrieves a stored decision. Both require a current same-tenant staff session; POST also requires Origin/CSRF. Customers cannot see staff validation evidence. No endpoint accepts client identity, policy, evidence, provider state, decision or gateway mode.
 
@@ -15,3 +15,5 @@ The runtime defaults to LIVE_TEST and has no connected provider reader or approv
 The same gateway is the rules-only baseline and must remain the authority boundary for one-shot and adaptive investigator variants. The draft held-out corpus has not been run; passing engineering tests is not held-out evaluation evidence.
 
 The second gateway milestone implements persistent resource leases, atomic operation reservation/receipt+approval consumption and an isolated service-authenticated reservation API. See [operation reservation](OPERATIONS.md). Provider submission/reconciliation remain unimplemented.
+
+Rules-v2 adds operation-scoped revalidation after reservation: consumed receipt/approval and an existing operation are accepted only for that exact stored operation; all other binding/expiry/policy/role checks still apply. Old rules-v1 records remain readable but cannot authorize a new reservation. This version change occurred before any evaluation freeze. See CANCELLATION.md for controlled submission/reconciliation limits.
