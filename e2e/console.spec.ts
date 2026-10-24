@@ -21,7 +21,7 @@ async function login(page: Page, email: string) {
   await page.getByLabel("Password", { exact: true }).fill(a.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Request workspace" }),
+    page.getByRole("heading", { name: "Requests", exact: true }),
   ).toBeVisible();
 }
 async function context(email: string) {
@@ -83,13 +83,31 @@ async function propose(id: string, action: unknown) {
 }
 async function open(page: Page, view: string, id: string) {
   await page.goto("/#/" + view + "/" + id + "?version=1");
-  await expect(page.locator(".case-context")).toBeVisible();
+  await expect(
+    page.locator(
+      view === "review"
+        ? ".review-case-header"
+        : view === "replay"
+          ? ".replay-page-header"
+          : ".case-context",
+    ),
+  ).toBeVisible();
 }
 async function noOverflow(page: Page) {
+  const overflowing = await page
+    .locator("body *")
+    .evaluateAll((elements) =>
+      elements
+        .filter(
+          (element) => element.getBoundingClientRect().right > innerWidth + 1,
+        )
+        .map((element) => element.tagName + "." + element.className),
+    );
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth + 1,
     ),
+    overflowing.join(", "),
   ).toBe(true);
 }
 
@@ -98,7 +116,7 @@ test("customer creates and exactly confirms a cancellation; refresh preserves th
 }) => {
   await login(page, "customer.a@proofit.test");
   await expect(
-    page.getByRole("link", { name: "Investigation & review" }),
+    page.getByRole("link", { name: "Investigations", exact: true }),
   ).toHaveCount(0);
   await page.getByRole("button", { name: "New request", exact: true }).click();
   await page
@@ -192,7 +210,14 @@ test("staff manually proposes an unauthorised refund; the backend blocks it", as
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
   expect(
-    reviewAudit.violations.map((v) => ({ id: v.id, impact: v.impact })),
+    reviewAudit.violations.map((v) => ({
+      id: v.id,
+      impact: v.impact,
+      nodes: v.nodes.map((n) => ({
+        target: n.target,
+        summary: n.failureSummary,
+      })),
+    })),
   ).toEqual([]);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
@@ -250,9 +275,7 @@ test("an unavailable investigation is recorded honestly and replay/reload cannot
     .getByRole("button", { name: "Investigate evidence", exact: true })
     .click();
   await expect(page.getByText("Unavailable", { exact: true })).toBeVisible();
-  await page
-    .getByRole("link", { name: "Outcome & replay", exact: true })
-    .click();
+  await page.getByRole("link", { name: "Execution log", exact: true }).click();
   await expect(
     page.getByText(
       "The investigator integration was unavailable. No model response was fabricated.",
@@ -262,9 +285,9 @@ test("an unavailable investigation is recorded honestly and replay/reload cannot
   await expect(
     page.getByRole("heading", { name: "No operation recorded" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Submit action" }),
-  ).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Submit action" })).toHaveCount(
+    0,
+  );
   await page.reload();
   await expect(
     page.getByText(
@@ -349,7 +372,7 @@ test("recorded controlled outcomes distinguish verified scheduling, pending and 
       ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Submit action" }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await page.reload();
     await expect(page.locator(".outcome-state")).toBeVisible();
   }
@@ -358,7 +381,14 @@ test("recorded controlled outcomes distinguish verified scheduling, pending and 
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
   expect(
-    outcomeAudit.violations.map((v) => ({ id: v.id, impact: v.impact })),
+    outcomeAudit.violations.map((v) => ({
+      id: v.id,
+      impact: v.impact,
+      nodes: v.nodes.map((n) => ({
+        target: n.target,
+        summary: n.failureSummary,
+      })),
+    })),
   ).toEqual([]);
 });
 test("keyboard skip/dialog focus, stored text safety and accessibility pass in light and dark modes", async ({

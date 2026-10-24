@@ -7,8 +7,8 @@ import type {
 import { api } from "./api.ts";
 import { ActionForm, useMutation } from "./forms.tsx";
 import { ActionCard, Badge, Empty, Icon, Modal, Notice } from "./ui.tsx";
-import { dateTime, formatMoney, json } from "./format.ts";
-import { navigate } from "./routing.ts";
+import { dateTime, formatMoney, json, shortId } from "./format.ts";
+import { href, navigate } from "./routing.ts";
 export function ReviewView({
   data,
   actor,
@@ -40,6 +40,7 @@ export function ReviewView({
   const passed = validation?.checks.filter((c) => c.result === "PASS") ?? [];
   const receipt = data.receipt;
   const approved = data.approvals?.at(-1);
+  const investigation = data.investigations?.at(-1);
   const approvalUsable =
     !!receipt &&
     receipt.binding.action.type === "REFUND_PAYMENT" &&
@@ -47,46 +48,107 @@ export function ReviewView({
     Date.parse(receipt.expiresAt) > Date.now() &&
     current;
   return (
-    <div className="stack large-gap">
-      <section className="panel">
+    <div className="stack large-gap review-layout">
+      <header className="review-case-header">
+        <a className="text-button left" href={href("request")}>
+          ← Back to all requests
+        </a>
+        <div className="review-case-title">
+          <p className="eyebrow">REQUEST REVIEW</p>
+          <h2>
+            Review request <span className="mono">{shortId(data.request.id)}</span>
+            <Badge value={validation?.decision ?? "NOT_VALIDATED"}>
+              {validation ? undefined : "Not validated"}
+            </Badge>
+          </h2>
+          <p className="muted">Request received {dateTime(data.request.created_at)}</p>
+        </div>
+        <a
+          className="button primary"
+          href={href("replay", data.request.id, data.request.version)}
+        >
+          View replay <Icon name="arrow" size={17} />
+        </a>
+      </header>
+      <section className="panel review-main">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">02 / INVESTIGATION & REVIEW</p>
-            <h2>Compare action with authority</h2>
+            <p className="eyebrow">ACTION AUTHORITY</p>
+            <h2>Confirmed intent vs. proposal</h2>
           </div>
-          {validation ? (
-            <Badge value={validation.decision} />
-          ) : (
-            <Badge value="NOT_VALIDATED">Not validated</Badge>
-          )}
+        </div>
+        <ol className="review-steps" aria-label="Request review progress">
+          <li className="complete">
+            <span aria-hidden="true"><Icon name="check" size={13} /></span>
+            <div><strong>Request received</strong><small>Request version recorded</small></div>
+          </li>
+          <li className={receipt ? "complete" : "pending"}>
+            <span aria-hidden="true">{receipt ? <Icon name="check" size={13} /> : "2"}</span>
+            <div><strong>Authority confirmed</strong><small>{receipt ? "Exact action confirmed" : "Customer confirmation not recorded"}</small></div>
+          </li>
+          <li className={
+            !investigation
+              ? "pending"
+              : investigation.status === "COMPLETE" || investigation.status === "RULES_ONLY"
+                ? "complete"
+                : "held"
+          }>
+            <span aria-hidden="true">{!investigation ? "3" : investigation.status === "COMPLETE" || investigation.status === "RULES_ONLY" ? <Icon name="check" size={13} /> : "!"}</span>
+            <div><strong>Investigation recorded</strong><small>{investigation ? `${investigation.status.replaceAll("_", " ")} · ${dateTime(investigation.created_at)}` : "No investigation run recorded"}</small></div>
+          </li>
+          <li className={
+            !validation ? "pending" : validation.decision === "BLOCK" ? "blocked" : validation.decision === "READY" ? "complete" : "held"
+          }>
+            <span aria-hidden="true">{!validation ? "4" : validation.decision === "READY" ? <Icon name="check" size={13} /> : "!"}</span>
+            <div><strong>{!validation ? "Decision pending" : validation.decision === "BLOCK" ? "Action blocked" : validation.decision === "READY" ? "Action eligible" : "Action held for review"}</strong><small>{validation ? "Recorded backend decision" : "Run checks to record a decision"}</small></div>
+          </li>
+        </ol>
+        <div className={"review-safety " + (validation?.decision === "BLOCK" ? "blocked" : "neutral")}>
+          <Icon name="lock" size={17} />
+          <span>
+            <strong>
+              {validation?.decision === "BLOCK"
+                ? "Action blocked."
+                : validation?.decision === "READY"
+                  ? "Action eligible."
+                  : validation
+                    ? "Review required."
+                    : "No decision recorded."}
+            </strong>{" "}
+            No provider action was submitted from this workspace.
+          </span>
         </div>
         <div className="comparison">
           <div>
-            {proposal ? (
-              <ActionCard
-                title="Untrusted proposal"
-                action={json(proposal.proposal_json)}
-                subtle
-              />
-            ) : (
-              <div className="action-placeholder">
-                <Icon name="request" />
-                <h3>No proposal stored</h3>
-                <p>Add a manual test proposal to exercise the gateway.</p>
-              </div>
-            )}
-          </div>
-          <div>
             {receipt ? (
-              <ActionCard
-                title="Confirmed authority"
-                action={receipt.binding.action}
-              />
+              <div className="comparison-authority">
+                <ActionCard
+                  title="Customer confirmed"
+                  action={receipt.binding.action}
+                />
+              </div>
             ) : (
               <div className="action-placeholder">
                 <Icon name="lock" />
                 <h3>No confirmed authority</h3>
                 <p>Customer confirmation is required.</p>
+              </div>
+            )}
+          </div>
+          <div>
+            {proposal ? (
+              <div className="comparison-proposal">
+                <ActionCard
+                  title="AI proposal · untrusted"
+                  action={json(proposal.proposal_json)}
+                  subtle
+                />
+              </div>
+            ) : (
+              <div className="action-placeholder">
+                <Icon name="request" />
+                <h3>No proposal stored</h3>
+                <p>Add a manual test proposal to exercise the gateway.</p>
               </div>
             )}
           </div>
@@ -174,14 +236,18 @@ export function ReviewView({
           </div>
         )}
       </section>
-      <section className="panel">
+      <section className="panel review-checks">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">DETERMINISTIC CHECKS</p>
+            <p className="eyebrow">WHY IT WAS BLOCKED</p>
             <h2>
               {validation
-                ? "The recorded decision"
-                : "Validate before proceeding"}
+                ? validation.decision === "BLOCK"
+                  ? "Important details did not match"
+                  : validation.decision === "REVIEW_REQUIRED"
+                    ? "Details that still need review"
+                    : "Checks for this action"
+                : "No decision recorded yet"}
             </h2>
           </div>
           {validation && (
@@ -250,7 +316,7 @@ export function ReviewView({
         )}
       </section>
       {receipt?.binding.action.type === "REFUND_PAYMENT" && (
-        <section className="panel">
+        <section className="panel review-approval">
           <div className="panel-heading">
             <div>
               <p className="eyebrow">EXACT-AMOUNT APPROVAL</p>
@@ -303,11 +369,11 @@ export function ReviewView({
           )}
         </section>
       )}
-      <section className="panel">
+      <section className="panel review-history">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">EVIDENCE INVESTIGATION</p>
-            <h2>Recorded runs</h2>
+            <p className="eyebrow">HOW WE CHECKED</p>
+            <h2>Evidence and investigation history</h2>
           </div>
           <Icon name="search" />
         </div>
@@ -341,6 +407,13 @@ export function ReviewView({
             unavailable.
           </Empty>
         )}
+        <a
+          className="button secondary"
+          href={href("replay", data.request.id, data.request.version)}
+        >
+          View outcome
+          <Icon name="replay" size={17} />
+        </a>
       </section>
       {approval && receipt && (
         <Modal

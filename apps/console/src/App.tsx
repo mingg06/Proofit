@@ -10,7 +10,7 @@ import { useMutation } from "./forms.tsx";
 import { RequestView } from "./RequestView.tsx";
 import { ReviewView } from "./ReviewView.tsx";
 import { ReplayView } from "./ReplayView.tsx";
-import { Badge, Empty, Icon, Modal, Notice, Skeleton } from "./ui.tsx";
+import { Empty, Icon, Modal, Notice, Skeleton } from "./ui.tsx";
 import { dateTime, shortId } from "./format.ts";
 import { href, navigate, useRoute, type View } from "./routing.ts";
 const views: {
@@ -24,23 +24,23 @@ const views: {
     key: "request",
     label: "Requests",
     icon: "request",
-    title: "Request workspace",
-    description: "An exact request is the foundation of every action.",
+    title: "Requests",
+    description: "Review requests and follow each action from intent to outcome.",
   },
   {
     key: "review",
-    label: "Investigation & review",
+    label: "Investigations",
     icon: "review",
-    title: "Investigation desk",
+    title: "Review request",
     description:
-      "Compare the proposal with confirmed authority and recorded evidence.",
+      "Compare confirmed intent with the proposal, checks, and recorded evidence.",
   },
   {
     key: "replay",
-    label: "Outcome & replay",
+    label: "Execution log",
     icon: "replay",
-    title: "Execution record",
-    description: "Read the recorded outcome and trace how the case reached it.",
+    title: "Execution replay",
+    description: "Read the stored outcome and trace the events behind it.",
   },
 ];
 function Brand() {
@@ -52,7 +52,7 @@ function Brand() {
         </span>
       </span>
       <span>
-        PROOFIT<span className="brand-caption">ACTION CONTROL</span>
+        proofit<span className="brand-caption">AI CONTROL LAYER</span>
       </span>
     </a>
   );
@@ -94,13 +94,9 @@ function Login({
             <span>03</span>Observation-backed outcomes
           </div>
         </div>
-        <p className="login-foot">
-          SUBSCRIPTIONS & REFUNDS · STRIPE TEST ENVIRONMENT
-        </p>
       </section>
       <section className="login-form-wrap">
         <div className="login-form">
-          <Badge value="TEST">Local test workspace</Badge>
           <h2>Access your workspace</h2>
           <p className="muted">
             Sign in with your workspace account to review subscription actions.
@@ -294,11 +290,8 @@ function Workspace({
     .sort((a, b) => b - a);
   if (data && !versions.includes(data.request.version))
     versions.push(data.request.version);
-  const synthetic = resources.some(
-    (resource) => resource.provenance === "FIXTURE",
-  );
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-view={route.view}>
       <a
         className="skip-link"
         href="#workspace-content"
@@ -311,8 +304,9 @@ function Workspace({
       >
         Skip to workspace
       </a>
-      <header className="app-header">
+      <aside className="app-header">
         <Brand />
+        <p className="sidebar-label">Workspace</p>
         <nav aria-label="Console views">
           {views
             .filter(
@@ -332,6 +326,7 @@ function Workspace({
               </a>
             ))}
         </nav>
+        <div className="sidebar-spacer" />
         <div className="header-account">
           <div className="account">
             <span className="avatar">
@@ -349,39 +344,22 @@ function Workspace({
                     ? "Support staff"
                     : "Customer"}
               </strong>
-              <span className="mono" title={actor.tenant_id}>
-                {shortId(actor.tenant_id)}
-              </span>
+              <span className="account-role">{actor.role.replaceAll("_", " ").toLowerCase()}</span>
             </div>
             <button
-              className="icon-button"
+              className="button secondary sign-out"
               title="Sign out"
               aria-label="Sign out"
               disabled={mutation.busy}
               onClick={() => void mutation.run(() => api.logout(), onLogout)}
             >
               <Icon name="logout" size={18} />
+              Sign out
             </button>
           </div>
         </div>
-      </header>
+      </aside>
       <div className="main-shell">
-        <header className="topbar">
-          <div>
-            <span className="muted">Console</span>
-            <span className="slash">/</span>
-            <strong>{activeView.label}</strong>
-          </div>
-          <div className="topbar-state">
-            <span className="connection">
-              <span className="status-dot" />
-              {error ? "Connection issue" : "Authenticated workspace"}
-            </span>
-            <Badge value="TEST">
-              {synthetic ? "Synthetic records" : "Test environment"}
-            </Badge>
-          </div>
-        </header>
         <main id="workspace-content" className="workspace" tabIndex={-1}>
           <div className="page-heading">
             <div>
@@ -413,8 +391,10 @@ function Workspace({
           <div className="environment-strip">
             <Icon name="lock" size={15} />
             <span>
-              Test workspace. Provider writes are disabled; displayed decisions
-              and outcomes come from stored backend records.
+              {resources.some((resource) => resource.provenance === "FIXTURE")
+                ? "Synthetic records. "
+                : "Test workspace. "}
+              Provider writes are disabled; outcomes come from stored backend records.
             </span>
           </div>
           {mutation.error && <Notice error>{mutation.error}</Notice>}
@@ -463,6 +443,10 @@ function Workspace({
                       <span className="queue-item-meta">
                         <span className="mono">{shortId(row.id)}</span>
                         <span>{dateTime(row.created_at)}</span>
+                      </span>
+                      <span className="queue-open">
+                        Open
+                        <Icon name="arrow" size={16} />
                       </span>
                     </button>
                   ))}
@@ -535,6 +519,37 @@ function Workspace({
                       </select>
                     </label>
                   </div>
+                  <nav className="case-tabs" aria-label="Case sections">
+                    {views
+                      .filter(
+                        (view) =>
+                          actor.role !== "CUSTOMER" || view.key !== "review",
+                      )
+                      .map((view) => (
+                        <a
+                          key={view.key}
+                          href={href(
+                            view.key,
+                            data.request.id,
+                            data.request.version,
+                          )}
+                          className={
+                            "case-tab" +
+                            (route.view === view.key ? " active" : "")
+                          }
+                          aria-current={
+                            route.view === view.key ? "page" : undefined
+                          }
+                        >
+                          <Icon name={view.icon} size={16} />
+                          {view.key === "request"
+                            ? "Request"
+                            : view.key === "review"
+                              ? "Review"
+                              : "Outcome"}
+                        </a>
+                      ))}
+                  </nav>
                   {route.view === "request" ? (
                     <RequestView
                       key={data.request.id + ":" + data.request.version}
@@ -571,17 +586,25 @@ function Workspace({
                     review recorded checks, and follow the observed outcome.
                   </p>
                   <div className="welcome-steps">
-                    <span>
-                      <b>01</b> Confirm
-                    </span>
-                    <Icon name="arrow" size={16} />
-                    <span>
-                      <b>02</b> Review
-                    </span>
-                    <Icon name="arrow" size={16} />
-                    <span>
-                      <b>03</b> Observe
-                    </span>
+                    {views
+                      .filter(
+                        (view) =>
+                          actor.role !== "CUSTOMER" || view.key !== "review",
+                      )
+                      .map((view, index) => (
+                        <a
+                          key={view.key}
+                          className="welcome-step"
+                          href={href(view.key)}
+                        >
+                          <b>0{index + 1}</b>
+                          {view.key === "request"
+                            ? "Confirm"
+                            : view.key === "review"
+                              ? "Review"
+                              : "Observe"}
+                        </a>
+                      ))}
                   </div>
                   {actor.role === "CUSTOMER" && (
                     <button
@@ -598,7 +621,6 @@ function Workspace({
           </div>
           <footer className="workspace-footer">
             <span>PROOFIT · Verify the action before it happens.</span>
-            <span>MYR / STRIPE TEST MODE</span>
           </footer>
         </main>
       </div>

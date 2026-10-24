@@ -9,7 +9,7 @@ import { api } from "./api.ts";
 import { ActionForm, useMutation } from "./forms.tsx";
 import { ActionCard, Badge, Icon, Modal, Notice } from "./ui.tsx";
 import { dateTime, shortId } from "./format.ts";
-import { navigate } from "./routing.ts";
+import { href, navigate } from "./routing.ts";
 export function RequestView({
   data,
   actor,
@@ -190,6 +190,24 @@ export function RequestView({
           Change the request text
         </button>
       )}
+      <div className="next-steps">
+        {actor.role !== "CUSTOMER" && (
+          <a
+            className="button primary"
+            href={href("review", data.request.id, data.request.version)}
+          >
+            Open review
+            <Icon name="review" size={17} />
+          </a>
+        )}
+        <a
+          className="button secondary"
+          href={href("replay", data.request.id, data.request.version)}
+        >
+          View outcome
+          <Icon name="replay" size={17} />
+        </a>
+      </div>
       <div className="quiet-note">
         <Icon name="shield" size={18} />
         <p>
