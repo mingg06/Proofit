@@ -24,14 +24,14 @@ const views: {
     key: "request",
     label: "Requests",
     icon: "request",
-    title: "Intent comes first.",
+    title: "Request workspace",
     description: "An exact request is the foundation of every action.",
   },
   {
     key: "review",
     label: "Investigation & review",
     icon: "review",
-    title: "Proof before permission.",
+    title: "Investigation desk",
     description:
       "Compare the proposal with confirmed authority and recorded evidence.",
   },
@@ -39,7 +39,7 @@ const views: {
     key: "replay",
     label: "Outcome & replay",
     icon: "replay",
-    title: "Only what was observed.",
+    title: "Execution record",
     description: "Read the recorded outcome and trace how the case reached it.",
   },
 ];
@@ -47,10 +47,12 @@ function Brand() {
   return (
     <a className="brand" href="#/request" aria-label="PROOFIT requests">
       <span className="brand-mark">
-        <Icon name="shield" size={25} />
+        <span className="proof-glyph" aria-hidden="true">
+          P<span>✓</span>
+        </span>
       </span>
       <span>
-        PROOFIT<span className="brand-caption">ACTION ASSURANCE</span>
+        PROOFIT<span className="brand-caption">ACTION CONTROL</span>
       </span>
     </a>
   );
@@ -70,13 +72,11 @@ function Login({
       <section className="login-story">
         <Brand />
         <div className="login-statement">
-          <p className="eyebrow">VERIFY BEFORE IT HAPPENS</p>
+          <p className="eyebrow">INTENT → EVIDENCE → AUTHORITY</p>
           <h1>
-            Your intent.
+            Verify the action.
             <br />
-            Every action.
-            <br />
-            <em>Accounted for.</em>
+            <em>Preserve the proof.</em>
           </h1>
           <p>
             Confirm the request. Examine the evidence. Trust the recorded
@@ -101,7 +101,7 @@ function Login({
       <section className="login-form-wrap">
         <div className="login-form">
           <Badge value="TEST">Local test workspace</Badge>
-          <h2>Welcome to the console.</h2>
+          <h2>Access your workspace</h2>
           <p className="muted">
             Sign in with your workspace account to review subscription actions.
           </p>
@@ -311,11 +311,8 @@ function Workspace({
       >
         Skip to workspace
       </a>
-      <aside className="sidebar">
+      <header className="app-header">
         <Brand />
-        <div className="workspace-label">
-          <span className="status-dot" /> LOCAL WORKSPACE
-        </div>
         <nav aria-label="Console views">
           {views
             .filter(
@@ -332,21 +329,10 @@ function Workspace({
               >
                 <Icon name={view.icon} />
                 {view.label}
-                {route.view === view.key && <span className="nav-indicator" />}
               </a>
             ))}
         </nav>
-        <div className="sidebar-bottom">
-          <div className="sidebar-note">
-            <Icon name="shield" size={22} />
-            <p>
-              AI gathers evidence.
-              <br />
-              Code enforces authority.
-              <br />
-              People confirm intent.
-            </p>
-          </div>
+        <div className="header-account">
           <div className="account">
             <span className="avatar">
               {actor.role === "CUSTOMER"
@@ -378,7 +364,7 @@ function Workspace({
             </button>
           </div>
         </div>
-      </aside>
+      </header>
       <div className="main-shell">
         <header className="topbar">
           <div>
@@ -399,7 +385,7 @@ function Workspace({
         <main id="workspace-content" className="workspace" tabIndex={-1}>
           <div className="page-heading">
             <div>
-              <p className="eyebrow">SUBSCRIPTION ACTION CONTROL</p>
+              <p className="eyebrow">PROOFIT / SUBSCRIPTION OPERATIONS</p>
               <h1>{activeView.title}</h1>
               <p>{activeView.description}</p>
             </div>
@@ -578,8 +564,8 @@ function Workspace({
                   <span className="welcome-mark">
                     <Icon name="shield" size={40} />
                   </span>
-                  <p className="eyebrow">A CLEAR PATH FROM INTENT TO OUTCOME</p>
-                  <h2>Start with a request.</h2>
+                  <p className="eyebrow">NO REQUEST SELECTED</p>
+                  <h2>Open a case to begin.</h2>
                   <p>
                     Select a request from the queue to inspect its exact intent,
                     review recorded checks, and follow the observed outcome.

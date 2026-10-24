@@ -1,9 +1,10 @@
 # PROOFIT console design
 
-Initial implementation direction, selected for this console; no prior user-supplied brand guide was present.
+Redesigned for the action investigation workflow on 24 October 2026.
 
-- A quiet, editorial operations console with a dark forest sidebar, warm neutral surfaces and one green action accent.
-- System sans-serif for controls, Georgia for page-level headings, monospace for record identifiers. No external font or tracking requests.
-- Semantic green, amber and red always accompany explicit text labels. Decisions, operation states, provenance and observed effects remain separate.
-- Responsive layouts, visible keyboard focus, native dialog focus management and reduced-motion support. Dark-mode tokens follow the operating-system preference.
-- CSS design tokens live in apps/console/src/styles.css. Copy describes stored facts and exact supported actions. No invented counts, model traces or provider observations.
+- A compact audit workspace: graphite horizontal navigation, a scoped request index and an active case dossier. No permanent navigation sidebar.
+- Cool neutral surfaces, blue for navigation and actions; green only for positive recorded states, amber for holds, red for blocks. Explicit labels accompany every state.
+- System sans-serif headings and controls; monospace for record identifiers and metadata. No remote font, asset or tracking requests.
+- Flat borders, small radii, restrained type sizes. Proposed and confirmed action records remain adjacent where space permits. Request wording is treated as evidence, with a blue margin rule.
+- Responsive layouts, keyboard focus, native dialog focus management, reduced motion and operating-system dark-mode tokens.
+- Tokens live in apps/console/src/styles.css. All counts, authority and outcomes come from scoped backend records. No invented traces or provider effects.

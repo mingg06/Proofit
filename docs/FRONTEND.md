@@ -66,3 +66,5 @@ The browser server uses a separate random database and private account file. Thr
 Accessibility automation is evidence for the tested screens, not a complete accessibility certification. Full-screen-reader and cross-browser testing remain future verification. React/Node authority rules, external integration access and release/evaluation gates remain the source of truth.
 
 Official compatibility references: https://react.dev/learn/creating-a-react-app and https://vite.dev/guide/ .
+
+Visual redesign (24 October 2026): horizontal graphite navigation, blue actions, compact request index and case dossier, sans-serif headings, and separate semantic success colours. Build/typechecks and all eight Chromium workflows passed again, including tested light/dark accessibility, responsive layout, keyboard focus and recorded replay. See brand.md for current design direction.

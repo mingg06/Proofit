@@ -21,7 +21,7 @@ async function login(page: Page, email: string) {
   await page.getByLabel("Password", { exact: true }).fill(a.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Intent comes first." }),
+    page.getByRole("heading", { name: "Request workspace" }),
   ).toBeVisible();
 }
 async function context(email: string) {
