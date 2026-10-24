@@ -176,3 +176,7 @@ Critical path: contracts → persistent identity/authority → deterministic gat
 Alongside that path, the AI owner develops evidence integrations/investigation/memory; UI uses typed fixtures until live endpoints are ready; case design and baseline preparation start immediately. Each shared contract and migration has one primary editor. Integrate at the end of every day.
 
 Cut animations, an optional second reviewer, broad ingestion, extra providers, complex billing, and conversational polish first. Preserve exact authority, isolated execution, durable operation identity, truthful outcomes, real required integrations, both simple supported actions, and baseline evaluation. A failed exit gate remains unfinished; it is not waived to meet a date.
+
+## 24 October implementation evidence
+
+First Phase 2 milestone: rules-v1 named checks and persistent staff-scoped validations, structured policy/source/evidence schemas and a bounded read-only provider adapter boundary are implemented. Controlled fixtures demonstrate exact READY, BLOCK and review behavior; default API cannot treat fixtures as live. Reservation/provider execution remain pending. This does not close the Phase 2 exit gate or any live integration gate.

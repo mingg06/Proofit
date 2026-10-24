@@ -1,3 +1,4 @@
+import { Gateway } from './gateway.ts';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
 import { z, ZodError } from 'zod';
@@ -34,6 +35,7 @@ function send(res: ServerResponse, status: number, body: unknown): void {
 }
 const querySchema = z.strictObject({ version: z.coerce.number().int().positive().default(1) });
 export function createApi(foundation: Foundation, origin: string) {
+  const gateway = new Gateway(foundation.store, { now: foundation.now });
   const secure = new URL(origin).protocol === 'https:';
   const cookie = (value: string, maxAge: number) => 'proofit_session=' + value + '; HttpOnly; SameSite=Strict; Path=/; Max-Age=' + maxAge + (secure ? '; Secure' : '');
   // Local development protection. Distributed/deployed auth needs a shared rate limiter.
@@ -69,6 +71,9 @@ export function createApi(foundation: Foundation, origin: string) {
       if (method === 'POST' && path === '/api/logout') {
         foundation.auth.logout(token!); res.setHeader('Set-Cookie', cookie('', 0)); return send(res, 200, { loggedOut: true });
       }
+      if (method === 'POST' && path === '/api/validations') return send(res, 201, await gateway.validate(token!, await jsonBody(req)));
+      const validationMatch = /^\/api\/validations\/([^/]+)$/.exec(path);
+      if (method === 'GET' && validationMatch?.[1]) return send(res, 200, gateway.getValidation(token!, decodeURIComponent(validationMatch[1])));
       if (method === 'GET' && path === '/api/requests') return send(res, 200, foundation.listRequests(token!));
       if (method === 'POST' && path === '/api/requests') return send(res, 201, foundation.createRequest(token!, await jsonBody(req)));
       const match = /^\/api\/requests\/([^/]+)$/.exec(path);

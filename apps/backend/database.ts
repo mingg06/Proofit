@@ -22,17 +22,22 @@ export class Store {
   }
   migrate(): void {
     this.db.exec('CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, digest TEXT NOT NULL, applied_at TEXT NOT NULL) STRICT');
-    const sql = readFileSync(new URL('../../migrations/001_foundation.sql', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-    const digest = createHash('sha256').update(sql).digest('hex');
+    const migrations = ['001_foundation.sql', '002_gateway.sql'];
     this.transaction(() => {
-      const applied = this.get<{ digest: string }>('SELECT digest FROM schema_migrations WHERE version=1');
-      if (applied) {
-        if (applied.digest !== digest) throw new Error('Applied migration changed; create a new migration');
-        return;
-      }
-      this.db.exec(sql);
-      this.run('INSERT INTO schema_migrations VALUES(1,?,?)', digest, new Date().toISOString());
+      migrations.forEach((file, index) => {
+        const version = index + 1;
+        const sql = readFileSync(new URL('../../migrations/' + file, import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+        const digest = createHash('sha256').update(sql).digest('hex');
+        const applied = this.get<{ digest: string }>('SELECT digest FROM schema_migrations WHERE version=?', version);
+        if (applied) {
+          if (applied.digest !== digest) throw new Error('Applied migration changed; create a new migration');
+          return;
+        }
+        this.db.exec(sql);
+        this.run('INSERT INTO schema_migrations VALUES(?,?,?)', version, digest, new Date().toISOString());
+      });
     });
   }
+
   close(): void { this.db.close(); }
 }

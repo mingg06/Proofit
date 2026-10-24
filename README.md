@@ -60,3 +60,5 @@ Preflight currently exits 1 because sponsor/provider configuration is missing. I
 - evaluation/reviewer-only: provisional expectations; exclude from every model/tool-visible source.
 
 See [contract decisions](docs/CONTRACTS.md) and [integration access record](docs/INTEGRATION_ACCESS.md). Next on the critical path: deterministic checks and persistent operation reservation before any provider writes; live integrations retain their access gates.
+
+Deterministic validation is now implemented: see [gateway behavior and provenance](docs/GATEWAY.md). Staff can POST /api/validations with only proposalId and retrieve the recorded decision. Local sources are synthetic and there is no live reader, so the running API holds them for review. Operation reservation and provider execution are not enabled.

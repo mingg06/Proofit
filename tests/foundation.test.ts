@@ -189,6 +189,19 @@ test('authenticated HTTP foundation enforces exact authority and isolation', asy
     assert.equal((await call('/api/session', 'GET', undefined, customer)).status, 401);
     clock = new Date('2026-10-23T00:00:00.000Z');
   });
+  await t.test('staff validation HTTP routes enforce role and tenant scope', async () => {
+    const confirmed = await receipt();
+    const p = await call('/api/proposals','POST',{requestId:confirmed.binding.requestId,requestVersion:1,proposal:refund,conversation:''},support);
+    const body = {proposalId:p.data.proposalId};
+    assert.equal((await call('/api/validations','POST',body,customer)).status,403);
+    assert.equal((await call('/api/validations','POST',body,otherApprover)).status,404);
+    const v = await call('/api/validations','POST',body,support);
+    assert.equal(v.status,201); assert.equal(v.data.decision,'REVIEW_REQUIRED'); assert.equal(v.data.rulesVersion,'rules-v1');
+    assert.equal((await call('/api/validations/'+v.data.validationId,'GET',undefined,support)).status,200);
+    assert.equal((await call('/api/validations/'+v.data.validationId,'GET',undefined,otherApprover)).status,404);
+    assert.equal((await call('/api/validations/'+v.data.validationId,'GET',undefined,customer)).status,403);
+    assert.equal((await call('/api/validations','POST',{...body,mode:'CONTROLLED_TEST'},support)).status,400);
+  });
   await t.test('logout revokes a persisted session and no execution route exists', async () => {
     assert.equal((await call('/api/execute', 'POST', { validationId: 'arbitrary' }, customer)).status, 404);
     assert.equal((await call('/api/logout', 'POST', {}, other)).status, 200);

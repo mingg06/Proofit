@@ -39,7 +39,7 @@ export const decisionSchema = z.enum(['BLOCK', 'REVIEW_REQUIRED', 'READY']);
 export const operationStateSchema = z.enum(['RESERVED', 'SUBMITTED', 'PENDING', 'SUCCEEDED', 'FAILED', 'CANCELED', 'OUTCOME_UNKNOWN']);
 export type OperationState = z.infer<typeof operationStateSchema>;
 export const checkSchema = z.strictObject({ name: id, result: z.enum(['PASS', 'BLOCK', 'REVIEW_REQUIRED']), reason: z.string().min(1), evidenceIds: z.array(id) });
-export const validationSchema = z.strictObject({ validationId: id, proposalId: id, receiptId: id, bindingDigest: digest,
+export const validationSchema = z.strictObject({ validationId: id, proposalId: id, receiptId: id.nullable(), bindingDigest: digest.nullable(),
   decision: decisionSchema, checks: z.array(checkSchema).min(1), createdAt: timestamp });
 export const evidenceRefSchema = z.strictObject({ sourceId: id, sourceVersion: id, passageId: id });
 export const evidenceSchema = z.strictObject({ evidenceId: id, tenantId: id, requestId: id, requestVersion: z.number().int().positive(),
