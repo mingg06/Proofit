@@ -8,6 +8,12 @@ import {
 } from "@playwright/test";
 import { readFile, mkdir } from "node:fs/promises";
 const origin = "http://127.0.0.1:3100";
+// Reuse authenticated API fixture sessions so expanding the suite doesn't exhaust
+// the production login limiter. Browser sign-in/sign-out coverage remains unchanged.
+const apiSessions = new Map<string, {
+  storageState: Awaited<ReturnType<APIRequestContext["storageState"]>>;
+  csrfToken: string;
+}>();
 async function account(email: string) {
   const accounts = JSON.parse(
     await readFile(".local/e2e-accounts.json", "utf8"),
@@ -25,6 +31,11 @@ async function login(page: Page, email: string) {
   ).toBeVisible();
 }
 async function context(email: string) {
+  const cached = apiSessions.get(email);
+  if (cached) return {
+    context: await requestFactory.newContext({ baseURL: origin, extraHTTPHeaders: { Origin: origin }, storageState: cached.storageState }),
+    headers: { Origin: origin, "X-CSRF-Token": cached.csrfToken },
+  };
   const a = await account(email);
   const context = await requestFactory.newContext({
     baseURL: origin,
@@ -33,6 +44,7 @@ async function context(email: string) {
   const response = await context.post("/api/login", { data: a });
   expect(response.status()).toBe(200);
   const login = await response.json();
+  apiSessions.set(email, { storageState: await context.storageState(), csrfToken: login.csrfToken });
   return {
     context,
     headers: { Origin: origin, "X-CSRF-Token": login.csrfToken },
@@ -94,6 +106,8 @@ async function open(page: Page, view: string, id: string) {
   ).toBeVisible();
 }
 async function noOverflow(page: Page) {
+  // Viewport changes can complete before Chromium has painted the responsive layout.
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   const overflowing = await page
     .locator("body *")
     .evaluateAll((elements) =>
@@ -167,6 +181,31 @@ test("customer creates and exactly confirms a cancellation; refresh preserves th
     fullPage: true,
   });
 });
+test("queued case progress updates automatically and stops polling when review finishes", async ({ page }) => {
+  const c = await createCase();
+  await login(page, "customer.a@proofit.test");
+  let reads = 0;
+  let writes = 0;
+  page.on("request", request => { if (request.method() === "POST") writes++; });
+  await page.route("**/api/requests/" + c.request.id + "?version=1", async route => {
+    const response = await route.fetch();
+    const body = await response.json();
+    reads++;
+    const complete = reads >= 3;
+    body.automation = { ...body.automation, status: complete ? "REVIEW_REQUIRED" : reads === 1 ? "QUEUED" : "INVESTIGATING",
+      message: complete ? "Synthetic review finished; provider submission remains disabled." : "Synthetic queued review is processing." };
+    await route.fulfill({ response, json: body });
+  });
+  await open(page, "request", c.request.id);
+  await expect(page.locator(".automation-status")).toContainText("QUEUED");
+  await expect(page.locator(".automation-status")).toContainText("REVIEW REQUIRED");
+  const completedReads = reads;
+  // Wait longer than the polling interval to verify a terminal state doesn't keep requesting.
+  await page.waitForTimeout(2000);
+  expect(reads).toBe(completedReads);
+  expect(writes).toBe(0);
+});
+
 test("staff manually proposes an unauthorised refund; the backend blocks it", async ({
   page,
 }) => {
@@ -491,5 +530,34 @@ test("a canceled slow request cannot replace the newly selected case", async ({
         requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
       ),
   );
+  await expect(page.locator(".request-quote")).toHaveText(second.text);
+});
+
+test("a late background progress response cannot replace the newly selected case", async ({ page }) => {
+  const first = await createCase();
+  const second = await createCase();
+  await login(page, "customer.a@proofit.test");
+  let reads = 0;
+  let release!: () => void;
+  let started!: () => void;
+  let finished!: () => void;
+  const waiting = new Promise<void>(resolve => { release = resolve; });
+  const entered = new Promise<void>(resolve => { started = resolve; });
+  const done = new Promise<void>(resolve => { finished = resolve; });
+  await page.route("**/api/requests/" + first.request.id + "?version=1", async route => {
+    const response = await route.fetch();
+    const body = await response.json();
+    body.automation = { ...body.automation, status: "QUEUED", message: "Synthetic queued progress." };
+    if (++reads === 1) { await route.fulfill({ response, json: body }); return; }
+    started();
+    await waiting;
+    try { await route.fulfill({ response, json: body }); } catch { /* Navigation aborted this old read. */ }
+    finally { finished(); }
+  });
+  await open(page, "request", first.request.id);
+  await entered;
+  await page.locator(".queue-item").filter({ hasText: second.text }).click();
+  await expect(page.locator(".request-quote")).toHaveText(second.text);
+  release(); await done;
   await expect(page.locator(".request-quote")).toHaveText(second.text);
 });

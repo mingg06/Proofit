@@ -18,7 +18,10 @@ export async function standaloneReview(
     models.proposer.provenance !== "LIVE"
   )
     throw new Error("Standalone startup requires real models");
-  const session = await foundation.auth.login(account);
+  const session = await foundation.auth.login({
+    email: account.email,
+    password: account.password,
+  });
   const actor = foundation.auth.session(session.token).actor;
   if (actor.role !== "SUPPORT") {
     foundation.auth.logout(session.token);

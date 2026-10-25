@@ -4,6 +4,8 @@
 
 Standalone review milestone: direct NVIDIA proposal/investigation, approved local SQLite evidence, authenticated queue processing and scoped stored replay are connected in one local process. The real-inference synthetic probe passes and creates zero operations; fixtures and absent provider state retain review holds. Provider execution/deployment remain unfinished. Commands and measured usage are in docs/STANDALONE.md. Major verified steps are committed by owner instruction.
 
+Standalone usability verification: real-browser synthetic confirmation through NVIDIA-backed cited review and replay passes; 162 Node tests, 10 Chromium workflows, all four typechecks and the production build pass. Automatic progress refresh stops at terminal holds and cancels old reads. The standalone review milestone is complete for this local synthetic-data profile; genuine Stripe execution and production installation remain subsequent work.
+
 Based on `PROOFIT_FINAL_PLAN.md` v3.1. This document turns the proposal into an implementation sequence; no phase is complete yet. Dates are working targets in Malaysia time, taken from the source plan. External platform capabilities and submission requirements must be checked during implementation.
 
 ## Earlier build evidence — 23 October 2026

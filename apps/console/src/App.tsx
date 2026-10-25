@@ -275,6 +275,37 @@ function Workspace({
       });
     return () => controller.abort();
   }, [route.id, route.version, revision]);
+  const processing =
+    data?.request.id === route.id &&
+    data?.request.version === route.version &&
+    ["QUEUED", "INVESTIGATING"].includes(data?.automation?.status ?? "");
+  useEffect(() => {
+    if (!processing || !route.id) return;
+    const controller = new AbortController();
+    const id = route.id;
+    const version = route.version;
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
+      try {
+        if (document.visibilityState === "visible") {
+          const value = await api.case(id, version, controller.signal);
+          if (!controller.signal.aborted) {
+            setData(value);
+            setCaseError(null);
+          }
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) setCaseError(errorText(error));
+      } finally {
+        if (!controller.signal.aborted) timer = setTimeout(poll, 1500);
+      }
+    }
+    timer = setTimeout(poll, 1500);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [route.id, route.version, processing]);
   const latest = new Map<string, RequestRow>();
   for (const row of requests)
     if (!latest.has(row.id) || latest.get(row.id)!.version < row.version)

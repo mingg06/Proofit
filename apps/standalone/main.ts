@@ -12,6 +12,7 @@ import { prepareStandaloneFixtures } from "./fixtures.ts";
 import { standaloneReview } from "./runtime.ts";
 
 let store: Store | undefined;
+let stage = "runtime configuration";
 try {
   const settings = config();
   if (settings.bindHost !== "127.0.0.1")
@@ -19,6 +20,7 @@ try {
   const key = z.string().trim().min(1).parse(process.env.NVIDIA_API_KEY);
   const modelId = z.string().trim().min(1).parse(process.env.NVIDIA_MODEL_ID);
   let account: { email: string; password: string };
+  stage = "support-account configuration";
   if (
     process.env.PROOFIT_SUPPORT_EMAIL ||
     process.env.PROOFIT_SUPPORT_PASSWORD
@@ -48,12 +50,14 @@ try {
         a.role === "SUPPORT",
     );
     if (!seeded) throw new Error("Local support account unavailable");
-    account = seeded;
+    account = { email: seeded.email, password: seeded.password };
   }
+  stage = "database migration and fixture preparation";
   store = new Store(settings.databasePath);
   store.migrate();
   prepareStandaloneFixtures(store);
   const foundation = new Foundation(store, () => new Date(), true);
+  stage = "model setup and support authentication";
   const runtime = await standaloneReview(foundation, account, {
     model: createNvidiaModel(key, modelId),
     proposer: createNvidiaProposer(key, modelId),
@@ -62,6 +66,7 @@ try {
     gateway: runtime.gateway,
     investigator: runtime.investigator,
   });
+  stage = "loopback server startup";
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
     server.listen(settings.port, settings.bindHost, resolve);
@@ -72,6 +77,7 @@ try {
       ". Direct NVIDIA and local evidence; provider execution disabled. Seed records remain synthetic.",
   );
   const stop = new AbortController();
+  stage = "automatic review processing";
   const shutdown = () => stop.abort();
   process.once("SIGINT", shutdown);
   process.once("SIGTERM", shutdown);
@@ -98,7 +104,9 @@ try {
   }
 } catch {
   console.error(
-    "Standalone startup/processing stopped. Check Node 24, NVIDIA settings, local database and support account. See docs/STANDALONE.md. Raw errors withheld.",
+    "Standalone stopped during " +
+      stage +
+      ". See docs/STANDALONE.md. Raw errors withheld.",
   );
   process.exitCode = 1;
 } finally {

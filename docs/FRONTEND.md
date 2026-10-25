@@ -2,6 +2,8 @@
 
 Standalone update: use `npm.cmd run start:standalone` on Node 24 to serve this console with direct NVIDIA and automatic local-evidence review. It reads private `.env.nvidia` and requires no sponsor software. Seed data stays synthetic and provider execution stays disabled. The API-only preview on port 3002 is separate; use a free port and matching APP_ORIGIN for standalone. See [current setup](STANDALONE.md).
 
+The current standalone preview uses port 3003. Active queued/investigating cases poll stored case records every 1.5 seconds while visible; terminal holds stop polling. Navigation, version changes and sign-out abort old reads. Polling makes no model/execution request and preserves form state. Ten Chromium workflows now pass, including terminal-stop and late-background-response isolation; the production login limiter is unchanged. A separate real-browser/NVIDIA synthetic confirmation-to-review/replay check passes; measured evidence is in STANDALONE.md.
+
 Implemented 24 October 2026 against the authenticated backend. Three views are available: request/confirmation, investigation/review, and execution/replay. The console never establishes trusted roles, approval state, execution decisions or execution payloads. Provider execution remains disabled and no phase is declared complete.
 
 ## Run the built console

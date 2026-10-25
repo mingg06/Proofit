@@ -29,7 +29,7 @@ npx.cmd --yes --package=node@24.22.1 node node_modules/vite/bin/vite.js build --
 npx.cmd --yes --package=node@24.22.1 node --env-file=.env.nvidia apps/standalone/main.ts
 ~~~
 
-The earlier API-only preview uses http://127.0.0.1:3002 because port 3000 already had a service. Set PORT and matching APP_ORIGIN for a separate standalone preview. See [frontend setup](docs/FRONTEND.md) for ports, HMR development and browser verification, and [backend API setup](docs/BACKEND.md) for authority contracts.
+The standalone review preview runs at http://127.0.0.1:3003. The earlier API-only preview on port 3002 and the existing port-3000 service are left intact. Set PORT and matching APP_ORIGIN for a separate instance. See [frontend setup](docs/FRONTEND.md) for ports, HMR development and browser verification, and [backend API setup](docs/BACKEND.md) for authority contracts.
 
 ## Verify
 
@@ -40,7 +40,7 @@ npm.cmd run browser:install
 npm.cmd run test:browser
 ~~~
 
-Verified for the standalone review milestone: all four TypeScript projects, production build, 161 Node tests and 8 Chromium workflows including tested light/dark accessibility. Browser fixtures are visibly CONTROLLED_TEST; they do not make provider calls.
+Verified for the standalone review milestone: all four TypeScript projects, production build, 162 Node tests and 10 Chromium workflows including progress polling, navigation cancellation and tested light/dark accessibility. Those browser fixtures are CONTROLLED_TEST and do not make provider calls. A separate real-browser/direct-NVIDIA flow also passes on synthetic local records with three cited findings, recorded usage and zero operations; see docs/STANDALONE.md.
 
 Node 24 fallbacks use the same invocation above with node_modules/typescript/bin/tsc --noEmit, --test tests/*.test.ts apps/eve/tests/*.test.ts, or scripts/browser-tests.ts. Preflight now checks standalone configuration; missing optional sponsor/executor settings do not block it. Scripts do not load .env files automatically, except explicit --env-file options in start:standalone, standalone:probe and eve scripts.
 

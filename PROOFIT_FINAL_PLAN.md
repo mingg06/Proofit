@@ -2,6 +2,8 @@
 
 > **Owner decision — 25 October 2026:** This project is continuing independently, without a hackathon submission. [Standalone product direction](docs/STANDALONE.md) supersedes sponsor-specific requirements, mandatory eve integration, event deadlines and competition evaluation gates in this original plan. Core authority/reliability contracts and initial action/test-provider scope remain applicable. The original plan below is retained for architecture and historical context.
 
+Current implementation: the local standalone review flow uses direct NVIDIA plus approved SQLite evidence, with a real-browser synthetic-data confirmation-to-cited-review/replay check. No sponsor runtime is required. Provider execution remains disabled in this profile; actual results and the next delivery steps are recorded in docs/STANDALONE.md.
+
 **Tagline:** You proof it. You profit.  
 **Project type:** Standalone Web2 application, built independently  
 **Track:** Track 3 — Reasoning Architecture  

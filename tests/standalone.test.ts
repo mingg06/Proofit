@@ -258,6 +258,24 @@ test("standalone startup requires real model ports and a currently authenticated
   await assert.rejects(standaloneReview(h.foundation, h.account, m));
 });
 
+test("standalone accepts a seeded account record while deriving role and tenant solely from authentication", async (t) => {
+  const h = await setup();
+  const seeded = {
+    ...h.account,
+    role: "CUSTOMER",
+    tenant: "other",
+    unrelated: "synthetic seed metadata",
+  };
+  const runtime = await standaloneReview(h.foundation, seeded, models());
+  t.after(() => {
+    runtime.close();
+    h.store.close();
+  });
+  const actor = h.foundation.auth.session(runtime.token).actor;
+  assert.equal(actor.role, "SUPPORT");
+  assert.equal(actor.tenant_id, "tenant_synthetic_a");
+});
+
 test("fixture preparation is idempotent and cannot overwrite an existing approved policy", async (t) => {
   const h = await setup();
   t.after(() => h.store.close());
