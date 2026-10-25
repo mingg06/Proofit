@@ -1,6 +1,8 @@
 # Bounded investigation foundation — investigator-v1
 
-The isolated eve/NVIDIA bridge is now implemented and locally verified with genuine inference on synthetic context; see [eve setup and limits](EVE.md). Optional validated runtime references are persisted in MODEL_STEP events. The default API/automatic worker is not activated: real Zetaris retrieval and authoritative provider-state installation remain unavailable. Historical statements below are superseded only for the explicitly verified compatibility checks.
+Current standalone runtime: direct NVIDIA proposal/investigation and scoped approved SQLite evidence run through `start:standalone`, without eve, Zetaris or Meterless. Request/policy preloading consumes the same tool/time budget, strict citation checks still apply, and recorded replay calls no model. The real synthetic review probe passes. Provider state/execution remain unavailable in this review-only profile. See [standalone commands and usage](STANDALONE.md).
+
+The optional isolated eve/NVIDIA bridge is also implemented and verified on synthetic context; see [eve limits](EVE.md). Historical integration statements below describe the earlier path, not standalone prerequisites.
 
 ## NVIDIA compatibility verified — 25 October 2026
 

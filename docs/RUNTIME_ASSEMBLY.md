@@ -1,5 +1,7 @@
 # Prepared runtime assembly
 
+Current recommended local path: `apps/standalone/main.ts` installs direct NVIDIA plus local approved SQLite evidence and a SUPPORT-authenticated review loop in one process. No custom RuntimeFactory, sponsor service or provider credential is needed for review. See [standalone setup](STANDALONE.md). The optional composition helpers below remain available for more advanced installations.
+
 Update, 25 October: the isolated eve/NVIDIA bridge is now implemented and its synthetic live two-turn check passes. apps/eve/assemble.ts prepares review-only wiring with the existing support authentication. It still requires installation-supplied retrieval/provider reads; it does not activate the worker. See [eve boundaries and verified commands](EVE.md). Earlier preparation notes below describe the original state.
 
 Two tested helpers compose the existing services without introducing another approval or operation state machine. They do not enable default provider routes or prove remote compatibility.

@@ -16,6 +16,8 @@
     "seed": "node scripts/seed.ts",
     "dev": "node --watch apps/backend/main.ts",
     "start": "node apps/backend/main.ts",
+    "start:standalone": "node --env-file=.env.nvidia apps/standalone/main.ts",
+    "standalone:probe": "node --env-file=.env.nvidia scripts/standalone-probe.ts",
     "start:executor": "node apps/executor/main.ts",
     "stripe:probe": "node scripts/stripe-probe.ts",
     "nvidia:probe": "node scripts/nvidia-probe.ts",

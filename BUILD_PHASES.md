@@ -2,6 +2,8 @@
 
 > **Owner decision — 25 October 2026:** Follow [the standalone delivery order](docs/STANDALONE.md). Hackathon submission, sponsor access, mandatory eve integration and competition evaluation are no longer release gates. The original phases below remain architectural/historical reference; exact-authority, isolation, recovery and observed-outcome checks still apply. No previously unfinished integration is declared complete by this change.
 
+Standalone review milestone: direct NVIDIA proposal/investigation, approved local SQLite evidence, authenticated queue processing and scoped stored replay are connected in one local process. The real-inference synthetic probe passes and creates zero operations; fixtures and absent provider state retain review holds. Provider execution/deployment remain unfinished. Commands and measured usage are in docs/STANDALONE.md. Major verified steps are committed by owner instruction.
+
 Based on `PROOFIT_FINAL_PLAN.md` v3.1. This document turns the proposal into an implementation sequence; no phase is complete yet. Dates are working targets in Malaysia time, taken from the source plan. External platform capabilities and submission requirements must be checked during implementation.
 
 ## Earlier build evidence — 23 October 2026

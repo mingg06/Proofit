@@ -1,5 +1,7 @@
 # Persistent foundation API
 
+Current standalone profile: `start:standalone` installs a shared Gateway/Investigator into `createApi` through trusted server code and runs an authenticated worker in the same process. Public requests cannot select runtime ports. It uses direct NVIDIA and approved local evidence; neither provider state nor provider writes are enabled. The original `start` is unchanged. See [standalone setup](STANDALONE.md).
+
 This local Phase 1 slice stores authenticated accounts/sessions, tenant/customer mappings, request versions, raw proposals, exact-action confirmations, staff approvals, synthetic policy/source metadata and audit events in SQLite. It now also has a deterministic gateway and isolated reservation service (see GATEWAY.md and OPERATIONS.md). The React console is now served from the built assets, and bounded investigation/cancellation coordinator code is implemented under the documented controlled provenance. Live provider execution remains disabled. No phase exit gate is declared complete.
 
 ## Setup and commands

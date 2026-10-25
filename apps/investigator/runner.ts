@@ -69,12 +69,21 @@ export class Investigator {
      this.event(initial.scope.id,'TOOL_RESULT',{call:calls,tool:call.tool,result});history.push({call,result});
     }
     if(this.preloadEvidence){
-     const ids=(initial.snapshot.manifest?.evidence??[]).map(e=>(e.record as {evidenceId?:string})?.evidenceId).filter((id):id is string=>typeof id==='string');
+     // External or local retrieval may create this run's packet only when the first scoped tool is called.
+     if(this.retrieval){
+      checkTime();if(calls>=this.limits.toolCalls)throw new BudgetError();calls++;
+      const call={tool:'read_request_receipt' as const,input:{}};
+      this.event(initial.scope.id,'TOOL_STARTED',{call:calls,...call,reason:'EVIDENCE_PRELOAD'});
+      const result=await bounded(signal=>tools.call(call,signal));
+      this.event(initial.scope.id,'TOOL_RESULT',{call:calls,tool:call.tool,result});history.push({call,result});
+     }
+     const packet=tools.authorize();
+     const ids=(packet.manifest?.evidence??[]).map(e=>(e.record as {evidenceId?:string})?.evidenceId).filter((id):id is string=>typeof id==='string');
      for(const evidenceId of new Set(ids)){
-      if(history.some(h=>(h as {call:{tool:string;input:{evidenceId?:string}}}).call.input.evidenceId===evidenceId))continue;
+      if(g.store.get('SELECT evidence_id FROM investigation_evidence WHERE run_id=? AND evidence_id=?',initial.scope.id,evidenceId))continue;
       checkTime();if(calls>=this.limits.toolCalls)throw new BudgetError();calls++;
       const call={tool:'read_case_record' as const,input:{evidenceId}};
-      this.event(initial.scope.id,'TOOL_STARTED',{call:calls,...call,reason:'ONE_SHOT_EVIDENCE_PACKET'});
+      this.event(initial.scope.id,'TOOL_STARTED',{call:calls,...call,reason:'EVIDENCE_PRELOAD'});
       const result=await bounded(signal=>tools.call(call,signal));
       this.event(initial.scope.id,'TOOL_RESULT',{call:calls,tool:call.tool,result});history.push({call,result});
      }

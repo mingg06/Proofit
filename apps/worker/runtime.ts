@@ -6,7 +6,7 @@ import type {
 } from "../backend/review-pipeline.ts";
 import type { InvestigationModel } from "../../packages/contracts/investigation.ts";
 import type { EvidenceRetrieval } from "../investigator/retrieval.ts";
-/** Implement this installation module only after exact eve/NVIDIA and Zetaris instance compatibility is verified. */
+/** Optional installation module for verified model, evidence and provider ports; no sponsor runtime is mandatory. */
 export interface VerifiedRuntime {
   staffToken: string;
   model: InvestigationModel;

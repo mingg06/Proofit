@@ -1,5 +1,7 @@
 # Access and compatibility record
 
+Standalone update, 25 October: NVIDIA is the only required remote service for local review. Zetaris, Meterless/Nightshift and eve are optional. The real direct-NVIDIA/local-evidence probe passes; the startup preflight treats optional integrations as informational. Stripe access remains unverified and standalone provider reads/writes are disabled. See [current setup](STANDALONE.md); earlier service-specific records below remain historical evidence.
+
 24 October Zetaris preparation: official REST/SQL guides inspected; the linked public Postman repository returns 404 and instance documentation/credentials are unavailable. The code-injected normalized query boundary, two-source scoped query builder, atomic evidence/provenance ingestion and replay are tested with CONTROLLED_TEST clients. No HTTP paths or response envelopes were assumed, no new SDK was selected, and real access remains NOT_TESTED. See [Zetaris](ZETARIS.md).
 
 Checked 23 October 2026. No remote service access or model inference is claimed.

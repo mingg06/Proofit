@@ -2,7 +2,7 @@
 
 PROOFIT investigates proposed subscription actions and enforces exact authority before execution. It is continuing as an independent product, without a hackathon submission. [Standalone product direction](docs/STANDALONE.md) defines the current simplified stack and delivery order; it supersedes sponsor requirements in the original [plan](PROOFIT_FINAL_PLAN.md) and [phases](BUILD_PHASES.md).
 
-The React console provides request/confirmation/progress, investigation/review, outcome/replay and scoped JSON exports. The backend implements exact-action receipts/approvals, deterministic rules, atomic reservations, durable automatic review jobs, controlled cancellation/refund execution and recovery, bounded investigations, scoped retrieval preparation and durable working-memory capture/recall. The isolated eve/NVIDIA bridge now passes a real inference compatibility check on synthetic context. The instance-specific Zetaris transport, genuine Stripe runs, production runtime installation/deployment and independent frozen evaluation still require access and verification. Default startup reports unavailable automation and keeps provider writes disabled. No phase is declared complete.
+The React console provides request/confirmation/progress, investigation/review, outcome/replay and scoped JSON exports. The standalone review runtime connects direct NVIDIA inference and approved local SQLite evidence to persistent automatic review jobs. No sponsor software is required. A real NVIDIA review over synthetic local records passes with verified citations and measured usage. Cancellation/refund execution and recovery are tested through controlled providers; genuine Stripe runs and production deployment remain unverified. The standalone profile is review-only with provider reads/writes disabled. The original API-only startup still reports unavailable automation.
 
 Start with [the standalone direction and current limits](docs/STANDALONE.md), then the local commands below. The [manual integration checklist](docs/MANUAL_SETUP.md) describes the earlier optional integration path. See [refund execution](docs/REFUNDS.md), [exports](docs/EXPORTS.md), [working memory](docs/MEMORY.md) and [deployment](docs/DEPLOYMENT.md).
 
@@ -16,7 +16,8 @@ npm.cmd run migrate
 # Run seed only for a new empty database:
 npm.cmd run seed
 npm.cmd run build
-npm.cmd run start
+# Configure NVIDIA_API_KEY/NVIDIA_MODEL_ID in private .env.nvidia, then:
+npm.cmd run start:standalone
 ~~~
 
 Open http://127.0.0.1:3000. Migration/seed were already applied in this workspace; seed refuses to overwrite accounts. Random local test credentials are in gitignored .local/test-accounts.json.
@@ -25,10 +26,10 @@ The host defaults to Node 22.13.0. Verified fallback:
 
 ~~~powershell
 npx.cmd --yes --package=node@24.22.1 node node_modules/vite/bin/vite.js build --config apps/console/vite.config.ts
-npx.cmd --yes --package=node@24.22.1 node apps/backend/main.ts
+npx.cmd --yes --package=node@24.22.1 node --env-file=.env.nvidia apps/standalone/main.ts
 ~~~
 
-The current preview uses http://127.0.0.1:3002 because port 3000 already had a service. See [frontend setup](docs/FRONTEND.md) for ports, HMR development and browser verification, and [backend API setup](docs/BACKEND.md) for authority contracts.
+The earlier API-only preview uses http://127.0.0.1:3002 because port 3000 already had a service. Set PORT and matching APP_ORIGIN for a separate standalone preview. See [frontend setup](docs/FRONTEND.md) for ports, HMR development and browser verification, and [backend API setup](docs/BACKEND.md) for authority contracts.
 
 ## Verify
 
@@ -39,9 +40,11 @@ npm.cmd run browser:install
 npm.cmd run test:browser
 ~~~
 
-Verified: server/browser/e2e TypeScript, 148 Node tests, 8 Chromium workflows and accessibility checks on the tested light/dark views. Browser fixtures are visibly CONTROLLED_TEST; they do not make provider calls.
+Verified for the standalone review milestone: all four TypeScript projects, production build, 161 Node tests and 8 Chromium workflows including tested light/dark accessibility. Browser fixtures are visibly CONTROLLED_TEST; they do not make provider calls.
 
-Node 24 host fallbacks use the same node invocation above with node_modules/typescript/bin/tsc --noEmit, --test tests/*.test.ts, or scripts/browser-tests.ts. Existing migrate, seed, scenarios, preflight, stripe:probe and nvidia:probe scripts remain available. Preflight/probes report missing integration configuration honestly and do not establish live access from variable presence. Scripts do not load .env files automatically.
+Node 24 fallbacks use the same invocation above with node_modules/typescript/bin/tsc --noEmit, --test tests/*.test.ts apps/eve/tests/*.test.ts, or scripts/browser-tests.ts. Preflight now checks standalone configuration; missing optional sponsor/executor settings do not block it. Scripts do not load .env files automatically, except explicit --env-file options in start:standalone, standalone:probe and eve scripts.
+
+`npm.cmd run standalone:probe` checks real NVIDIA calls on isolated synthetic local records, records usage in gitignored `.local/standalone-probe.json`, and submits no provider writes. See [standalone setup and measured evidence](docs/STANDALONE.md).
 
 ## Source boundaries
 
@@ -65,4 +68,4 @@ Review comparison: apps/evaluation/comparison.ts measures rules-only, one-shot a
 
 Development corpus: all 12 dossiers are authored in fixtures/development-cases.ts. npm.cmd run test:development runs 36 isolated CONTROLLED_TEST reviews (rules-only, one-shot and full), writes .local/development-case-results.json, and checks the intended named control as well as the decision. No held-out labels, genuine inference or provider writes are used. See docs/DEVELOPMENT_CASES.md and docs/RUNTIME_ASSEMBLY.md.
 
-Commit boundary: 9dcfb2b contains the working local features and development corpus, independently verified with 128 Node tests and 8 browser workflows. The additional NVIDIA/Zetaris integration, worker activation and deployment drafts remain uncommitted; the working-tree 148-test count includes their preparation tests.
+Commit policy: verified major steps are committed by owner instruction. 58d69f3 checkpoints the earlier optional integration/deployment drafts and standalone product decision; later commits implement the standalone path. Private configuration, credentials, databases and probe results stay gitignored.

@@ -16,9 +16,10 @@ function cookieToken(req: IncomingMessage): string | undefined {
   return values[0]?.slice('proofit_session='.length);
 }
 const querySchema = z.strictObject({ version: z.coerce.number().int().positive().default(1) });
-export function createApi(foundation: Foundation, origin: string) {
-  const gateway = new Gateway(foundation.store, { now: foundation.now });
-  const investigator = new Investigator(gateway);
+export function createApi(foundation: Foundation, origin: string, runtime?: { gateway: Gateway; investigator: Investigator }) {
+  const gateway = runtime?.gateway ?? new Gateway(foundation.store, { now: foundation.now });
+  const investigator = runtime?.investigator ?? new Investigator(gateway);
+  if (gateway.store !== foundation.store || investigator.gateway !== gateway) throw new Error('API runtime must share the authoritative store and gateway');
   const ledger = new OperationLedger(gateway);
   const secure = new URL(origin).protocol === 'https:';
   const cookie = (value: string, maxAge: number) => 'proofit_session=' + value + '; HttpOnly; SameSite=Strict; Path=/; Max-Age=' + maxAge + (secure ? '; Secure' : '');
