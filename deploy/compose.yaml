@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: ..
+    environment:
+      PORT: "3000"
+      BIND_HOST: "0.0.0.0"
+      APP_ORIGIN: "https://${PROOFIT_DOMAIN:?Set PROOFIT_DOMAIN to your public hostname}"
+      DATABASE_PATH: /app/.local/proofit.sqlite
+    expose:
+      - "3000"
+    volumes:
+      - proofit_state:/app/.local
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+  proxy:
+    image: caddy:2-alpine
+    environment:
+      PROOFIT_DOMAIN: "${PROOFIT_DOMAIN:?Set PROOFIT_DOMAIN}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  proofit_state:
+  caddy_data:
+  caddy_config:

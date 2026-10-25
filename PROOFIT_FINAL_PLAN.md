@@ -1,5 +1,7 @@
 # PROOFIT — Verify the Action Before It Happens
 
+> **Owner decision — 25 October 2026:** This project is continuing independently, without a hackathon submission. [Standalone product direction](docs/STANDALONE.md) supersedes sponsor-specific requirements, mandatory eve integration, event deadlines and competition evaluation gates in this original plan. Core authority/reliability contracts and initial action/test-provider scope remain applicable. The original plan below is retained for architecture and historical context.
+
 **Tagline:** You proof it. You profit.  
 **Project type:** Standalone Web2 application, built independently  
 **Track:** Track 3 — Reasoning Architecture  

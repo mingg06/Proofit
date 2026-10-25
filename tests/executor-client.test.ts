@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { once } from "node:events";
 import { randomBytes } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { cancellationHarness } from "./cancellation-helpers.ts";
 import { createExecutorApi } from "../apps/executor/http.ts";
 import { ExecutorClient } from "../apps/backend/executor-client.ts";
@@ -43,7 +45,7 @@ test("worker executor client uses authenticated fixed routes and only stored val
   assert.throws(() => new ExecutorClient("https://arbitrary.example", secret));
   assert.throws(() => new ExecutorClient(origin + "/path", secret));
 });
-test("default executor still exposes no provider read/write routes", async (t) => {
+test("default executor still exposes no provider read/write routes and worker startup cannot invent an integration", async (t) => {
   const h = await cancellationHarness();
   t.after(() => h.store.close());
   const secret = randomBytes(32).toString("hex");
@@ -71,4 +73,16 @@ test("default executor still exposes no provider read/write routes", async (t) =
       ).status,
       404,
     );
+  const env = { ...process.env };
+  delete env.PROOFIT_RUNTIME_MODULE;
+  delete env.STRIPE_TEST_SECRET_KEY;
+  await assert.rejects(
+    promisify(execFile)(process.execPath, ["apps/worker/main.ts"], { env }),
+    (error) => {
+      const result = error as Error & { stderr: string; code: number };
+      assert.equal(result.code, 1);
+      assert.match(result.stderr, /verified runtime configuration/);
+      return true;
+    },
+  );
 });

@@ -71,4 +71,4 @@ Visual redesign (24 October 2026): horizontal graphite navigation, blue actions,
 
 Automatic processing/export milestone: confirmation persists a single review job and the customer view shows its recorded progress or explicit unavailability. The replay view downloads a scoped JSON evidence packet without new investigation/execution; a real Chromium test checks the downloaded payload. Refund observations now share the outcome view, with exact amount/currency and pending/succeeded distinctions from backend records. Provider submission controls remain disabled in default startup.
 
-Latest verification: production build, three TypeScript projects, 128 Node tests and 8 Chromium workflows pass after review-job progress, refund observation types and scoped export downloads were integrated. Stored replay/export remains free of new model/provider calls.
+Latest verification: production build, three TypeScript projects, 131 Node tests and 8 Chromium workflows pass after review-job progress, refund observation types and scoped export downloads were integrated. Stored replay/export remains free of new model/provider calls.

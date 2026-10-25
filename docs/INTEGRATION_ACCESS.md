@@ -1,5 +1,7 @@
 # Access and compatibility record
 
+24 October Zetaris preparation: official REST/SQL guides inspected; the linked public Postman repository returns 404 and instance documentation/credentials are unavailable. The code-injected normalized query boundary, two-source scoped query builder, atomic evidence/provenance ingestion and replay are tested with CONTROLLED_TEST clients. No HTTP paths or response envelopes were assumed, no new SDK was selected, and real access remains NOT_TESTED. See [Zetaris](ZETARIS.md).
+
 Checked 23 October 2026. No remote service access or model inference is claimed.
 
 | Item | Observed result |
@@ -35,3 +37,9 @@ Persistence verification: Node v24.22.1 DatabaseSync worked in memory and on dis
 24 October: stripe 23.0.1 installed and typechecked on Node 24.22.1; pinned API 2026-09-30.endive matches installed SDK. Narrow cancellation adapter tested with CONTROLLED_TEST transport. Read-only stripe:probe returned NOT_TESTED/missing STRIPE_TEST_SECRET_KEY, making no live calls. See CANCELLATION.md.
 
 24 October investigation access check: eve public configuration docs and npm eve 0.83.0 metadata inspected; Node 24 is compatible with its stated prerequisite. eve is not installed and NVIDIA/eve structured-output/tool compatibility is NOT_TESTED. The standalone nvidia:probe reports missing NVIDIA_API_KEY/NVIDIA_MODEL_ID, making no network call. Bounded coordinator tests use explicitly CONTROLLED_TEST models; token values in those fixtures are not NVIDIA usage. See INVESTIGATION.md.
+
+24 October NVIDIA transport preparation: fixed-endpoint bounded model adapter and a two-turn structured lookup compatibility probe implemented with CONTROLLED_TEST transport tests. Current process preflight still reports all required sponsor/provider configuration missing; user confirmed credentials are not configured. The new probe reports NOT_TESTED without making an inference request. No eve dependency was added, no runtime combination was assumed verified, and the default API/provider write boundary is unchanged. See INVESTIGATION.md.
+
+Latest local milestone: controlled refund execution/recovery, automatic review orchestration, scoped exports, local H-MEM working-memory subset, review-only comparison and deployment configuration are implemented. Node 24 typechecks/build, 131 Node tests and 8 Chromium workflows pass. Compose syntax validates; Docker engine startup/image verification remains NOT_TESTED. Preflight no longer demands a hosted Meterless token for the local subset. Genuine NVIDIA/eve, Zetaris, Stripe and acceptance/release gates remain manual and unfinished; see MANUAL_SETUP.md.
+
+Development preparation: authenticated runtime/executor assembly helpers are tested with controlled ports; no new provider/runtime dependency was chosen and no service access is asserted. All 12 development dossiers are authored, with 36 isolated review trials and exact named-check assertions; their scripted token counters are not NVIDIA usage. TypeScript and 148 Node tests pass. Operator setup supplies accounts/docs/access; the agent will finish the instance-specific transport/bridge once available. See DEVELOPMENT_CASES.md and RUNTIME_ASSEMBLY.md.

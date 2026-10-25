@@ -1,0 +1,7 @@
+{
+    admin off
+}
+
+{$PROOFIT_DOMAIN} {
+    reverse_proxy backend:3000
+}

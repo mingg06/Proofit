@@ -5,4 +5,6 @@ dist/
 !.env.example
 coverage/
 .local/
+.eve/
+.output/
 *.tsbuildinfo

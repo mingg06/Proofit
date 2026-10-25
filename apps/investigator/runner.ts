@@ -88,7 +88,7 @@ export class Investigator {
      const usage=measuredUsageSchema.safeParse(reply.usage);
      if(!usage.success||usage.data.modelId!==this.model.modelId){usageComplete=false;status='MALFORMED_OUTPUT';unresolved=['Measured model usage or model identity is missing/invalid.'];break;}
      inputTokens+=usage.data.inputTokens;outputTokens+=usage.data.outputTokens;
-     this.event(initial.scope.id,'MODEL_STEP',{turn:turns,modelId:usage.data.modelId,inputTokens:usage.data.inputTokens,outputTokens:usage.data.outputTokens,provenance:this.model.provenance});
+     this.event(initial.scope.id,'MODEL_STEP',{turn:turns,modelId:usage.data.modelId,inputTokens:usage.data.inputTokens,outputTokens:usage.data.outputTokens,provenance:this.model.provenance,...(usage.data.runtime?{runtime:usage.data.runtime}:{})});
      const step=modelStepSchema.safeParse(reply.output);
      if(!step.success){status='MALFORMED_OUTPUT';unresolved=['Model output failed its exact structured schema.'];break;}
      checkTime();

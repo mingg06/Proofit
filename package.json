@@ -7,8 +7,8 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "test": "node --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p apps/console/tsconfig.json && tsc --noEmit -p e2e/tsconfig.json",
+    "test": "node --test tests/*.test.ts apps/eve/tests/*.test.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p apps/console/tsconfig.json && tsc --noEmit -p e2e/tsconfig.json && tsc --noEmit -p apps/eve/tsconfig.json",
     "check": "npm run typecheck && npm test",
     "scenarios": "node scripts/scenarios.ts",
     "preflight": "node scripts/preflight.ts",
@@ -23,17 +23,29 @@
     "build": "vite build --config apps/console/vite.config.ts",
     "browser:install": "node scripts/browser-tests.ts install",
     "test:browser": "node scripts/browser-tests.ts",
+    "nvidia:investigation:probe": "node scripts/nvidia-investigation-probe.ts",
+    "start:worker": "node apps/worker/main.ts",
+    "dev:eve": "node --env-file=.env.nvidia scripts/eve-service.ts",
+    "eve:probe": "node --env-file=.env.nvidia apps/eve/probe.ts",
     "test:development": "node scripts/development-cases.ts"
   },
   "dependencies": {
+    "@ai-sdk/provider": "4.0.34",
+    "eve": "0.83.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "stripe": "23.0.1",
     "zod": "4.6.7"
   },
+  "overrides": {
+    "eve": {
+      "undici": "8.12.2"
+    }
+  },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1",
+    "@types/json-schema": "7.0.15",
     "@types/node": "24.10.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

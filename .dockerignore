@@ -1,0 +1,14 @@
+node_modules
+.git
+.local
+.env
+.env.*
+evaluation
+**/dist
+tests
+e2e
+*.log
+**/.env
+**/.env.*
+**/.local
+**/node_modules
